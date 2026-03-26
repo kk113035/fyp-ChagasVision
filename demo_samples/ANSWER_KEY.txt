@@ -1,0 +1,16 @@
+CHAGAS VISION — ANSWER KEY (SECRET)
+==================================================
+Samples drawn from held-out TEST SET only.
+
+ID              Age   Sex    TRUE LABEL          
+--------------------------------------------------
+patient_001     67    Female CHAGAS POSITIVE     
+patient_002     79    Female CHAGAS POSITIVE     
+patient_003     69    Male   CHAGAS POSITIVE     
+patient_004     48    Female CHAGAS NEGATIVE     
+patient_005     42    Female CHAGAS NEGATIVE     
+patient_006     71    Female CHAGAS POSITIVE     
+patient_007     54    Female CHAGAS NEGATIVE     
+patient_008     59    Female CHAGAS NEGATIVE     
+patient_009     75    Male   CHAGAS POSITIVE     
+patient_010     49    Male   CHAGAS NEGATIVE     

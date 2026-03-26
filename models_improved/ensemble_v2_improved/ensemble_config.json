@@ -1,0 +1,15 @@
+{
+  "n_folds": 5,
+  "optimal_threshold": 0.5,
+  "model_config": {
+    "num_leads": 12,
+    "seq_length": 2048,
+    "d_model": 128,
+    "nhead": 4,
+    "num_transformer_layers": 2,
+    "dim_feedforward": 512,
+    "use_metadata": true,
+    "metadata_dim": 8,
+    "use_se": true
+  }
+}

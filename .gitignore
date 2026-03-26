@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+dataRaw/
+dataProcessed/
+*.db
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+results/

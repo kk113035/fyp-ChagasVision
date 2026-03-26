@@ -1,0 +1,82 @@
+[
+  {
+    "filename": "sample_01_sami_trop_chagas_Chagas.h5",
+    "age": 73,
+    "sex": "Male",
+    "label": "Chagas",
+    "dataset": "sami_trop",
+    "category": "sami_trop_chagas"
+  },
+  {
+    "filename": "sample_02_sami_trop_chagas_Chagas.h5",
+    "age": 45,
+    "sex": "Male",
+    "label": "Chagas",
+    "dataset": "sami_trop",
+    "category": "sami_trop_chagas"
+  },
+  {
+    "filename": "sample_03_sami_trop_chagas_Chagas.h5",
+    "age": 53,
+    "sex": "Female",
+    "label": "Chagas",
+    "dataset": "sami_trop",
+    "category": "sami_trop_chagas"
+  },
+  {
+    "filename": "sample_04_sami_trop_chagas_Chagas.h5",
+    "age": 42,
+    "sex": "Male",
+    "label": "Chagas",
+    "dataset": "sami_trop",
+    "category": "sami_trop_chagas"
+  },
+  {
+    "filename": "sample_05_sami_trop_chagas_Chagas.h5",
+    "age": 57,
+    "sex": "Male",
+    "label": "Chagas",
+    "dataset": "sami_trop",
+    "category": "sami_trop_chagas"
+  },
+  {
+    "filename": "sample_06_code15_normal_Normal.h5",
+    "age": 72,
+    "sex": "Female",
+    "label": "Normal",
+    "dataset": "code15",
+    "category": "code15_normal"
+  },
+  {
+    "filename": "sample_07_code15_normal_Normal.h5",
+    "age": 54,
+    "sex": "Female",
+    "label": "Normal",
+    "dataset": "code15",
+    "category": "code15_normal"
+  },
+  {
+    "filename": "sample_08_code15_normal_Normal.h5",
+    "age": 80,
+    "sex": "Female",
+    "label": "Normal",
+    "dataset": "code15",
+    "category": "code15_normal"
+  },
+  {
+    "filename": "sample_09_code15_normal_Normal.h5",
+    "age": 74,
+    "sex": "Female",
+    "label": "Normal",
+    "dataset": "code15",
+    "category": "code15_normal"
+  },
+  {
+    "filename": "sample_10_code15_normal_Normal.h5",
+    "age": 68,
+    "sex": "Female",
+    "label": "Normal",
+    "dataset": "code15",
+    "category": "code15_normal"
+  }
+]

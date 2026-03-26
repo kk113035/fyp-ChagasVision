@@ -1,0 +1,207 @@
+{
+  "created": "2026-02-03T15:22:15.735673",
+  "threshold": 0.5200000000000002,
+  "n_samples": 20,
+  "samples": [
+    {
+      "file": "verified_01_Chagas_correct_sami_trop.h5",
+      "label": "Chagas",
+      "age": 49,
+      "sex": "Female",
+      "source": "sami_trop",
+      "model_prob": 0.7303,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_02_Chagas_correct_code15.h5",
+      "label": "Chagas",
+      "age": 49,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.7301,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_03_Chagas_correct_sami_trop.h5",
+      "label": "Chagas",
+      "age": 47,
+      "sex": "Female",
+      "source": "sami_trop",
+      "model_prob": 0.7299,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_04_Chagas_correct_code15.h5",
+      "label": "Chagas",
+      "age": 50,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.7297,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_05_Chagas_correct_sami_trop.h5",
+      "label": "Chagas",
+      "age": 46,
+      "sex": "Female",
+      "source": "sami_trop",
+      "model_prob": 0.7296,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_06_Chagas_correct_sami_trop.h5",
+      "label": "Chagas",
+      "age": 50,
+      "sex": "Female",
+      "source": "sami_trop",
+      "model_prob": 0.7295,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_07_Chagas_correct_sami_trop.h5",
+      "label": "Chagas",
+      "age": 50,
+      "sex": "Female",
+      "source": "sami_trop",
+      "model_prob": 0.7294,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_08_Chagas_correct_code15.h5",
+      "label": "Chagas",
+      "age": 46,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.7293,
+      "model_pred": "Chagas",
+      "correct": true
+    },
+    {
+      "file": "verified_09_Chagas_missed_code15.h5",
+      "label": "Chagas",
+      "age": 52,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.4637,
+      "model_pred": "Normal",
+      "correct": false
+    },
+    {
+      "file": "verified_10_Chagas_missed_code15.h5",
+      "label": "Chagas",
+      "age": 80,
+      "sex": "Male",
+      "source": "code15",
+      "model_prob": 0.503,
+      "model_pred": "Normal",
+      "correct": false
+    },
+    {
+      "file": "verified_11_Normal_correct_code15.h5",
+      "label": "Normal",
+      "age": 18,
+      "sex": "Male",
+      "source": "code15",
+      "model_prob": 0.1944,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_12_Normal_correct_code15.h5",
+      "label": "Normal",
+      "age": 19,
+      "sex": "Male",
+      "source": "code15",
+      "model_prob": 0.2068,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_13_Normal_correct_ptbxl.h5",
+      "label": "Normal",
+      "age": 3,
+      "sex": "Female",
+      "source": "ptbxl",
+      "model_prob": 0.2159,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_14_Normal_correct_ptbxl.h5",
+      "label": "Normal",
+      "age": 17,
+      "sex": "Male",
+      "source": "ptbxl",
+      "model_prob": 0.2165,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_15_Normal_correct_code15.h5",
+      "label": "Normal",
+      "age": 24,
+      "sex": "Male",
+      "source": "code15",
+      "model_prob": 0.2174,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_16_Normal_correct_code15.h5",
+      "label": "Normal",
+      "age": 22,
+      "sex": "Male",
+      "source": "code15",
+      "model_prob": 0.22,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_17_Normal_correct_ptbxl.h5",
+      "label": "Normal",
+      "age": 19,
+      "sex": "Male",
+      "source": "ptbxl",
+      "model_prob": 0.2247,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_18_Normal_correct_code15.h5",
+      "label": "Normal",
+      "age": 17,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.2264,
+      "model_pred": "Normal",
+      "correct": true
+    },
+    {
+      "file": "verified_19_Normal_missed_code15.h5",
+      "label": "Normal",
+      "age": 79,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.5807,
+      "model_pred": "Chagas",
+      "correct": false
+    },
+    {
+      "file": "verified_20_Normal_missed_code15.h5",
+      "label": "Normal",
+      "age": 66,
+      "sex": "Female",
+      "source": "code15",
+      "model_prob": 0.5215,
+      "model_pred": "Chagas",
+      "correct": false
+    }
+  ]
+}
