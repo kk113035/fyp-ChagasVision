@@ -14,6 +14,8 @@ Deploy::
 import streamlit as st
 import torch
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore", message="enable_nested_tensor")
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -246,6 +248,85 @@ input, textarea, select, [data-baseweb="select"],
 .stTabs [aria-selected="true"] {
     background: #2563eb !important;
     color: #ffffff !important;
+}
+
+/* ── Login Card ── */
+.login-card {
+    background: #111827;
+    border: 1px solid #1e3a5f;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.login-card .icon-row {
+    display: flex; justify-content: center; gap: 1.5rem; margin: 1rem 0 0.5rem 0;
+}
+.login-card .icon-item {
+    text-align: center; font-size: 0.72rem; color: #64748b;
+}
+.login-card .icon-item .ic { font-size: 1.3rem; margin-bottom: 0.2rem; }
+.login-divider {
+    display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0;
+    color: #334155; font-size: 0.8rem;
+}
+.login-divider::before, .login-divider::after {
+    content: ''; flex: 1; height: 1px; background: #1e3a5f;
+}
+
+/* ── Accessibility: focus outlines ── */
+.stButton > button:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+}
+
+/* ── Accessibility: skip link (hidden until focused) ── */
+.skip-link {
+    position: absolute; top: -100px; left: 0;
+    background: #3b82f6; color: white;
+    padding: 0.5rem 1rem; z-index: 9999;
+    font-size: 0.9rem; font-weight: 600;
+    border-radius: 0 0 8px 0;
+    text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* ── Accessibility: screen reader only text ── */
+.sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+    .hero { padding: 1.5rem 1rem; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero p { font-size: 0.9rem; }
+    .sgrid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    .scard .v { font-size: 1.3rem; }
+    .scard .l { font-size: 0.6rem; }
+    .ctbl th, .ctbl td { padding: 0.4rem 0.5rem; font-size: 0.75rem; }
+    .res-pos, .res-neg, .res-bor { padding: 0.8rem; }
+    .res-pos h4, .res-neg h4, .res-bor h4 { font-size: 0.95rem; }
+    .upbox { padding: 1.5rem; }
+    .upbox .ic { font-size: 2rem; }
+    .login-hero { padding: 1.2rem; }
+    .login-hero h2 { font-size: 1.4rem; }
+    .login-card { padding: 1.2rem; }
+    .disc { font-size: 0.75rem; padding: 0.6rem; }
+    .shdr { font-size: 0.9rem; }
+    .instr-box { font-size: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+    .hero h1 { font-size: 1.3rem; }
+    .sgrid { grid-template-columns: 1fr 1fr; }
+    .scard { padding: 0.8rem; }
+    .scard .v { font-size: 1.1rem; }
+    .ctbl { font-size: 0.7rem; }
 }
 
 /* ── Expander dark ── */
@@ -651,35 +732,57 @@ def page_home():
 
 
 def page_login():
-    st.markdown('<div class="login-hero"><h2>🔐 Secure Access</h2>'
-                '<p>Only authorised clinical personnel may access the ECG scanner</p></div>',
+    st.markdown('<div class="login-hero"><h2>🔐 Secure Clinical Access</h2>'
+                '<p>Authorised healthcare personnel only — all sessions are encrypted and logged</p></div>',
                 unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="login-card">
+        <div class="icon-row">
+            <div class="icon-item"><div class="ic">🔒</div>Encrypted</div>
+            <div class="icon-item"><div class="ic">🛡️</div>SHA-256 Hash</div>
+            <div class="icon-item"><div class="ic">📋</div>Audit Logged</div>
+            <div class="icon-item"><div class="ic">👤</div>Role-Based</div>
+        </div>
+    </div>""", unsafe_allow_html=True)
+
     _, col, _ = st.columns([1, 2, 1])
     with col:
         tab1, tab2 = st.tabs(["🔑 Login", "📝 Register"])
         with tab1:
             with st.form("login"):
-                u = st.text_input("Username"); p = st.text_input("Password", type="password")
-                if st.form_submit_button("Login", use_container_width=True, type="primary"):
+                st.markdown("##### Sign in to your account")
+                u = st.text_input("Username", placeholder="Enter your username")
+                p = st.text_input("Password", type="password", placeholder="Enter your password")
+                if st.form_submit_button("Sign In", use_container_width=True, type="primary"):
                     if u and p:
                         r = verify_user(u, p)
                         if r:
                             st.session_state.update({"authenticated":True,"username":u,"full_name":r[0],"role":r[1],"page":"scanner"})
                             st.rerun()
-                        else: st.error("Invalid credentials.")
-                    else: st.warning("Enter both fields.")
-            
+                        else: st.error("Invalid credentials. Please check your username and password.")
+                    else: st.warning("Please enter both username and password.")
+            st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
+            dc1, dc2 = st.columns(2)
+            with dc1:
+                st.code("admin / admin123", language=None)
+            with dc2:
+                st.code("clinician / chagas2025", language=None)
+
         with tab2:
             with st.form("reg"):
-                nu = st.text_input("Username",key="ru"); nn = st.text_input("Full Name")
-                np1 = st.text_input("Password", type="password", key="rp1")
-                np2 = st.text_input("Confirm", type="password", key="rp2")
-                if st.form_submit_button("Register", use_container_width=True):
-                    if not all([nu,nn,np1,np2]): st.error("All fields required.")
-                    elif np1!=np2: st.error("Passwords don't match.")
-                    elif len(np1)<6: st.error("Min 6 characters.")
-                    elif register_user(nu,np1,nn): st.success("Registered! Switch to Login tab.")
-                    else: st.error("Username taken.")
+                st.markdown("##### Create a new account")
+                nu = st.text_input("Choose Username", key="ru", placeholder="Minimum 3 characters")
+                nn = st.text_input("Full Name", placeholder="As it will appear on reports")
+                np1 = st.text_input("Password", type="password", key="rp1", placeholder="Minimum 6 characters")
+                np2 = st.text_input("Confirm Password", type="password", key="rp2", placeholder="Re-enter password")
+                if st.form_submit_button("Create Account", use_container_width=True):
+                    if not all([nu,nn,np1,np2]): st.error("All fields are required.")
+                    elif len(nu) < 3: st.error("Username must be at least 3 characters.")
+                    elif np1!=np2: st.error("Passwords do not match.")
+                    elif len(np1)<6: st.error("Password must be at least 6 characters.")
+                    elif register_user(nu,np1,nn): st.success("Account created! Switch to the Login tab to sign in.")
+                    else: st.error("Username already taken. Please choose another.")
 
 
 def page_scanner(models, results, default_threshold):
@@ -934,7 +1037,17 @@ def page_about():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main():
-    init_db(); navbar()
+    init_db()
+
+    # Accessibility: skip-to-content link for keyboard/screen reader users
+    st.markdown('<a href="#main-content" class="skip-link" tabindex="0">Skip to main content</a>',
+                unsafe_allow_html=True)
+
+    navbar()
+
+    # Landmark for skip link
+    st.markdown('<div id="main-content"></div>', unsafe_allow_html=True)
+
     page = st.session_state["page"]; auth = st.session_state["authenticated"]
 
     if page == "home": page_home()
