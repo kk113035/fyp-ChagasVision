@@ -668,7 +668,7 @@ def page_login():
                             st.rerun()
                         else: st.error("Invalid credentials.")
                     else: st.warning("Enter both fields.")
-            st.caption("Default: `admin` / `admin123`  or  `clinician` / `chagas2025`")
+            
         with tab2:
             with st.form("reg"):
                 nu = st.text_input("Username",key="ru"); nn = st.text_input("Full Name")
