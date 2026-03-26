@@ -679,22 +679,16 @@ def page_home():
     <div class="hero">
         <h1>Detect Chagas Disease<br>from <span class="acc">12-Lead ECG</span></h1>
         <p>AI-powered clinical screening system using a hybrid Multi-Scale CNN + Transformer
-           architecture. Trained on 143,114 ECG recordings from 3 international datasets with
-           4 Explainable AI methods for transparent, trustworthy clinical decisions.</p>
+           architecture. Trained on  ECG recordings from 3 datasets with
+            Explainable AI methods for transparent, trustworthy clinical decisions.</p>
     </div>""", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="sgrid">
-        <div class="scard"><div class="v v-blue">0.837</div><div class="l">AUC-ROC Score</div></div>
-        <div class="scard"><div class="v v-green">143,114</div><div class="l">Training ECGs</div></div>
-        <div class="scard"><div class="v v-red">0.745</div><div class="l">Balanced Accuracy</div></div>
-        <div class="scard"><div class="v v-purple">4</div><div class="l">XAI Methods</div></div>
-    </div>""", unsafe_allow_html=True)
+    
 
     c1, c2 = st.columns(2)
     with c1:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### 🦠 About Chagas Disease")
+        st.markdown("#### About Chagas Disease")
         st.markdown("Chagas disease is caused by *Trypanosoma cruzi*, affecting **6.5 million** "
                      "people. Chronic infection causes cardiomyopathy with characteristic ECG "
                      "abnormalities: **RBBB** (40-50%), **LAFB** (30-40%), **AV block** (15-25%). "
@@ -702,7 +696,7 @@ def page_home():
         st.markdown('</div>', unsafe_allow_html=True)
     with c2:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("#### 🔬 How ChagasVision Works")
+        st.markdown("#### How ChagasVision Works")
         st.markdown("**1.** Upload 12-lead ECG recording (HDF5 format)\n\n"
                      "**2.** Signal preprocessed: bandpass → normalise → resample\n\n"
                      "**3.** 5-model ensemble analyses the waveform\n\n"
@@ -710,14 +704,7 @@ def page_home():
                      "**5.** Clinical report generated with recommendations")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown("""
-    <table class="ctbl">
-        <tr><th>Method</th><th>Dataset</th><th>AUC-ROC</th><th>XAI</th><th>Data</th></tr>
-        <tr><td>Jidling et al. 2023</td><td>REDS-II</td><td>0.820</td><td>None</td><td>2M+</td></tr>
-        <tr><td>Jidling et al. 2023</td><td>ELSA-Brasil</td><td>0.770</td><td>None</td><td>2M+</td></tr>
-        <tr><td>Ribeiro et al. 2020</td><td>CODE (full)</td><td>0.870</td><td>None</td><td>2M+</td></tr>
-        <tr class="hl"><td>ChagasVision</td><td>Combined</td><td>0.837</td><td>4 methods</td><td>143K</td></tr>
-    </table>""", unsafe_allow_html=True)
+    
 
     if not st.session_state["authenticated"]:
         st.markdown("---")
@@ -732,11 +719,6 @@ def page_home():
 
 
 def page_login():
-    st.markdown('<div class="login-hero"><h2>🔐 Secure Clinical Access</h2>'
-                '<p>Authorised healthcare personnel only — all sessions are encrypted and logged</p></div>',
-                unsafe_allow_html=True)
-
-    
 
     _, col, _ = st.columns([1, 2, 1])
     with col:
