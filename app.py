@@ -1008,15 +1008,7 @@ def page_about():
 def main():
     init_db()
 
-    # Accessibility: skip-to-content link for keyboard/screen reader users
-    st.markdown('<a href="#main-content" class="skip-link" tabindex="0">Skip to main content</a>',
-                unsafe_allow_html=True)
-
     navbar()
-
-    # Landmark for skip link
-    st.markdown('<div id="main-content"></div>', unsafe_allow_html=True)
-
     page = st.session_state["page"]; auth = st.session_state["authenticated"]
 
     if page == "home": page_home()
