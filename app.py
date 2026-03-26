@@ -736,15 +736,7 @@ def page_login():
                 '<p>Authorised healthcare personnel only — all sessions are encrypted and logged</p></div>',
                 unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="login-card">
-        <div class="icon-row">
-            <div class="icon-item"><div class="ic">🔒</div>Encrypted</div>
-            <div class="icon-item"><div class="ic">🛡️</div>SHA-256 Hash</div>
-            <div class="icon-item"><div class="ic">📋</div>Audit Logged</div>
-            <div class="icon-item"><div class="ic">👤</div>Role-Based</div>
-        </div>
-    </div>""", unsafe_allow_html=True)
+    
 
     _, col, _ = st.columns([1, 2, 1])
     with col:
@@ -762,12 +754,7 @@ def page_login():
                             st.rerun()
                         else: st.error("Invalid credentials. Please check your username and password.")
                     else: st.warning("Please enter both username and password.")
-            st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
-            dc1, dc2 = st.columns(2)
-            with dc1:
-                st.code("admin / admin123", language=None)
-            with dc2:
-                st.code("clinician / chagas2025", language=None)
+            
 
         with tab2:
             with st.form("reg"):
