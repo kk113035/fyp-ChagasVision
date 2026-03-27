@@ -604,9 +604,22 @@ def page_scanner(models, results, default_threshold):
 
     st.markdown("#### ECG Analysis Console")
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
+
+    st.markdown("#### ECG Analysis Console")
+    st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
+
+    with st.expander("How to use the scanner", expanded=False):
+        st.markdown("""<div class="instr-box"><ol>
+            <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
+            <li><b>Upload</b> — drag/drop or click below</li>
+            <li><b>Enter info</b> — age, sex, optional Patient ID</li>
+            <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
+            <li><b>Review</b> — probability, attention overlay, patterns</li>
+            <li><b>Download</b> — clinical report for records</li>
+        </ol></div>""", unsafe_allow_html=True)
     
     # Simple threshold dropdown with slider inside
-    with st.expander("⚙️ Threshold Settings", expanded=False):
+    with st.expander("Threshold Settings", expanded=False):
         threshold = st.slider(
             "Adjust Threshold",
             min_value=0.30,
@@ -615,24 +628,30 @@ def page_scanner(models, results, default_threshold):
             step=0.01,
             label_visibility="collapsed"
         )
+        
+    with st.expander("Display Options", expanded=False):
         col1, col2, col3 = st.columns(3)
-        col1.metric("Current", f"{threshold*100:.0f}%")
-        col2.metric("Optimal", f"{default_threshold*100:.0f}%")
-        if threshold < default_threshold:
-            col3.info("🔴 Screening")
-        elif threshold > default_threshold:
-            col3.info("🟢 Confirm")
-        else:
-            col3.info("🟡 Balanced")
+        with col1:
+            show_prob = st.checkbox("Probability Gauge", True)
+            show_models = st.checkbox("Ensemble Agreement", True)
+            show_xai = st.checkbox("Lead Importance", True)
+            show_gcam = st.checkbox("Grad-CAM Overlay", True)
+        with col2:
+            show_gcam_d = st.checkbox("Grad-CAM Detail", True)
+            show_patt = st.checkbox("Clinical Patterns", True)
+            show_recs = st.checkbox("Recommendations", True)
+            show_t_occ = st.checkbox("Temporal Occlusion", True)
+        with col3:
+            show_ens_dis = st.checkbox("Ensemble Disagreement", True)
+            show_per_method = st.checkbox("Per-Method Comparison", True)
+            show_findings = st.checkbox("Clinical Findings", True)
+            show_peaks = st.checkbox("Attention Peaks", True)
     
-    st.markdown("---")
-    
-    # Show all visualizations by default
     show = {
-        "prob": True, "models": True, "xai": True,
-        "gcam": True, "gcam_d": True, "patt": True,
-        "recs": True, "t_occ": True, "ens_dis": True,
-        "per_method": True, "findings": True, "peaks": True
+        "prob": show_prob, "models": show_models, "xai": show_xai,
+        "gcam": show_gcam, "gcam_d": show_gcam_d, "patt": show_patt,
+        "recs": show_recs, "t_occ": show_t_occ, "ens_dis": show_ens_dis,
+        "per_method": show_per_method, "findings": show_findings, "peaks": show_peaks
     }
 
     c1, c2 = st.columns([2, 1])
@@ -658,7 +677,7 @@ def page_scanner(models, results, default_threshold):
     sc = st.session_state.get("scan_counter", 0)
 
     with c2:
-        pid = st.text_input("Patient ID", "", placeholder="Optional", key=f"pid_{sc}")
+        pid = st.text_input("Patient ID", "", placeholder="Enter Patient ID", key=f"pid_{sc}")
         a1, a2 = st.columns(2)
         age = a1.number_input("Age", min_value=1, max_value=120, value=None, placeholder="Enter age", key=f"age_{sc}")
         sex_s = a2.selectbox("Sex", ["Select", "Female", "Male"], key=f"sex_{sc}")
