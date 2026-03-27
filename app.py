@@ -423,15 +423,15 @@ def navbar():
         cols = st.columns([3, 1, 1, 1, 1, 2])
         with cols[0]: st.markdown("### 🫀 ChagasVision")
         with cols[1]:
-            if st.button("🏠 Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
+            if st.button("Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
         with cols[2]:
-            if st.button("🔬 Scanner", use_container_width=True): st.session_state["page"]="scanner"; st.rerun()
+            if st.button("Scanner", use_container_width=True): st.session_state["page"]="scanner"; st.rerun()
         with cols[3]:
-            if st.button("📋 History", use_container_width=True): st.session_state["page"]="history"; st.rerun()
+            if st.button("History", use_container_width=True): st.session_state["page"]="history"; st.rerun()
         with cols[4]:
-            if st.button("ℹ️ About", use_container_width=True): st.session_state["page"]="about"; st.rerun()
+            if st.button("About", use_container_width=True): st.session_state["page"]="about"; st.rerun()
         with cols[5]:
-            if st.button(f"🚪 {st.session_state['full_name']}", use_container_width=True):
+            if st.button(f"Logout {st.session_state['full_name']}", use_container_width=True):
                 for k in ["authenticated","username","full_name","role"]:
                     st.session_state[k] = "" if k != "authenticated" else False
                 st.session_state["page"]="home"; st.rerun()
@@ -439,11 +439,11 @@ def navbar():
         cols = st.columns([3, 1, 1, 1])
         with cols[0]: st.markdown("### 🫀 ChagasVision")
         with cols[1]:
-            if st.button("🏠 Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
+            if st.button("Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
         with cols[2]:
-            if st.button("🔐 Login", use_container_width=True): st.session_state["page"]="login"; st.rerun()
+            if st.button("Login", use_container_width=True): st.session_state["page"]="login"; st.rerun()
         with cols[3]:
-            if st.button("ℹ️ About", use_container_width=True): st.session_state["page"]="about"; st.rerun()
+            if st.button("About", use_container_width=True): st.session_state["page"]="about"; st.rerun()
     st.markdown("---")
 
 
@@ -629,9 +629,9 @@ def build_report(result, age, sex, threshold, pid=""):
     interp = result["interpretation"]
     ea = result.get("ensemble_analysis", {})
     lines = [
-        "╔══════════════════════════════════════════════════════╗",
-        "║      CHAGASVISION — CLINICAL ANALYSIS REPORT        ║",
-        "╚══════════════════════════════════════════════════════╝",
+        
+        "      CHAGASVISION — CLINICAL ANALYSIS REPORT        ",
+        "═════════════════════════════════════════════════════",
         f"Date: {datetime.now():%Y-%m-%d %H:%M}  Patient: {pid or 'N/A'}  Age: {age}  Sex: {sex}",
         f"\nRESULT: {result['prediction']}",
         f"Probability: {result['probability']*100:.1f}%  Confidence: {result['confidence']} ({result.get('confidence_score',0):.2f})",
@@ -698,10 +698,9 @@ def page_home():
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("#### How ChagasVision Works")
         st.markdown("**1.** Upload 12-lead ECG recording (HDF5 format)\n\n"
-                     "**2.** Signal preprocessed: bandpass → normalise → resample\n\n"
-                     "**3.** 5-model ensemble analyses the waveform\n\n"
-                     "**4.** 4 XAI methods explain the prediction\n\n"
-                     "**5.** Clinical report generated with recommendations")
+                     "**2.** 5-model ensemble analyses the waveform\n\n"
+                     "**3.** 4 XAI methods explain the prediction\n\n"
+                     "**4.** Clinical report generated with recommendations")
         st.markdown('</div>', unsafe_allow_html=True)
 
     
@@ -710,10 +709,10 @@ def page_home():
         st.markdown("---")
         _, c, _ = st.columns([1,2,1])
         with c:
-            if st.button("🔐 Login to Access the Scanner →", type="primary", use_container_width=True):
+            if st.button("Login to Access the Scanner →", type="primary", use_container_width=True):
                 st.session_state["page"] = "login"; st.rerun()
 
-    st.markdown('<div class="disc">⚕️ <b>Disclaimer:</b> ChagasVision is a clinical decision support '
+    st.markdown('<div class="disc"><b>Disclaimer:</b> ChagasVision is a clinical decision support '
                 'tool for research purposes only. It does not replace professional medical diagnosis. '
                 'Final confirmation requires serological testing.</div>', unsafe_allow_html=True)
 
@@ -722,7 +721,7 @@ def page_login():
 
     _, col, _ = st.columns([1, 2, 1])
     with col:
-        tab1, tab2 = st.tabs(["🔑 Login", "📝 Register"])
+        tab1, tab2 = st.tabs(["Login", "Register"])
         with tab1:
             with st.form("login"):
                 st.markdown("##### Sign in to your account")
@@ -742,7 +741,7 @@ def page_login():
             with st.form("reg"):
                 st.markdown("##### Create a new account")
                 nu = st.text_input("Choose Username", key="ru", placeholder="Minimum 3 characters")
-                nn = st.text_input("Full Name", placeholder="As it will appear on reports")
+                nn = st.text_input("Full Name", placeholder="Enter Full Name")
                 np1 = st.text_input("Password", type="password", key="rp1", placeholder="Minimum 6 characters")
                 np2 = st.text_input("Confirm Password", type="password", key="rp2", placeholder="Re-enter password")
                 if st.form_submit_button("Create Account", use_container_width=True):
@@ -771,11 +770,11 @@ def page_scanner(models, results, default_threshold):
             ("peaks","Attention peaks")]}
 
     # Title
-    st.markdown("#### 🔬 ECG Analysis Console")
+    st.markdown("#### ECG Analysis Console")
     st.caption(f"Logged in: **{st.session_state['full_name']}** • {datetime.now():%Y-%m-%d}")
 
     # Instructions dropdown
-    with st.expander("📖 How to use the scanner", expanded=False):
+    with st.expander("How to use the scanner", expanded=False):
         st.markdown("""
         <div class="instr-box">
         <ol>
@@ -800,7 +799,7 @@ def page_scanner(models, results, default_threshold):
         age = a1.number_input("Age", 1, 120, 50); sex_s = a2.selectbox("Sex", ["Female","Male"])
         sex_v = 1 if sex_s == "Male" else 0
 
-    if uploaded and st.button("🔍 Analyse ECG", type="primary", use_container_width=True):
+    if uploaded and st.button("Analyse ECG", type="primary", use_container_width=True):
         try:
             with h5py.File(uploaded, "r") as f:
                 raw = np.array(f["tracings"], dtype=np.float32)
