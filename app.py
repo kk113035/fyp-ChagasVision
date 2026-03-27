@@ -42,6 +42,15 @@ for key, val in [("authenticated", False), ("page", "home"),
 # DARK MODE CSS
 # ═══════════════════════════════════════════════════════════════════════════
 
+import streamlit as st
+
+st.markdown("""
+    <style>
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
