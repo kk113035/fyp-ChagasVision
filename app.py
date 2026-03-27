@@ -605,9 +605,6 @@ def page_scanner(models, results, default_threshold):
     st.markdown("#### ECG Analysis Console")
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
 
-    st.markdown("#### ECG Analysis Console")
-    st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
-
     with st.expander("How to use the scanner", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
             <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
