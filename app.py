@@ -48,7 +48,6 @@ import streamlit as st
 st.markdown("""
     <style>
     header {visibility: hidden;}
-    footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -569,7 +568,7 @@ def page_home():
         with c:
             if st.button("Login to Access the System →", type="primary", use_container_width=True):
                 st.session_state["page"] = "login"; st.rerun()
-    st.markdown("DISCLAIMER: This is a clinical decision support tool only. Confirm with serology.", unsafe_allow_html=True)
+    st.markdown("DISCLAIMER: This is a clinical decision support tool only.", unsafe_allow_html=True)
     st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
@@ -600,7 +599,7 @@ def page_login():
         st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
         
-    st.markdown("DISCLAIMER: This is a clinical decision support tool only. Confirm with serology.", unsafe_allow_html=True)
+    st.markdown("DISCLAIMER: This is a clinical decision support tool only.", unsafe_allow_html=True)
     st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
