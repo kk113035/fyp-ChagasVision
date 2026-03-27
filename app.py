@@ -43,7 +43,33 @@ for key, val in [("authenticated", False), ("page", "home"),
 # DARK MODE CSS
 # ═══════════════════════════════════════════════════════════════════════════
 
-import streamlit as st
+
+def add_footer():
+    st.markdown("---") # Visual separator
+    st.markdown(
+        """
+        <style>
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: white;
+            color: black;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            border-top: 1px solid #e6e6e6;
+        }
+        </style>
+        <div class="footer">
+            <p>DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. 
+            It does NOT replace professional medical diagnosis.<br>
+            © ChagasVision """ + str(datetime.now().year) + """</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.markdown("""
     <style>
@@ -791,6 +817,9 @@ def page_scanner(models, results, default_threshold):
     elif not uploaded:
         st.markdown('<div class="upbox"><div class="ic">📤</div><h4>Upload an ECG to begin</h4>'
                     '<p>Drag and drop HDF5 file, enter patient details, click Analyse</p></div>', unsafe_allow_html=True)
+        
+    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
+    st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
 def page_history():
