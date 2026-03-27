@@ -43,7 +43,14 @@ for key, val in [("authenticated", False), ("page", "home"),
 # DARK MODE CSS
 # ═══════════════════════════════════════════════════════════════════════════
 
+import streamlit as st
 
+st.markdown("""
+    <style>
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
 
 st.markdown("""
 <style>
@@ -286,7 +293,7 @@ def show_persistent_disclaimer():
     """Display disclaimer in sidebar that can always be toggled"""
     with st.sidebar:
         st.markdown("---")
-        if st.toggle("📋 Show Medical Disclaimer", value=st.session_state.get("show_disclaimer", True)):
+        with st.expander("📋 Medical Disclaimer", expanded=st.session_state.get("show_disclaimer", True)):
             st.markdown("""
             <div class="disc">
             <b>⚕️ Important Medical Disclaimer:</b><br>
@@ -615,20 +622,52 @@ def page_scanner(models, results, default_threshold):
 
     st.markdown("#### ECG Analysis Console")
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
-    with st.expander("How to use the scanner", expanded=False):
+    with st.expander("📱 How to use the scanner (including mobile)", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
             <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
-            <li><b>Upload</b> — drag/drop or click below (works on mobile too)</li>
+            <li><b>Upload</b> — drag/drop or click below</li>
             <li><b>Enter info</b> — age, sex, optional Patient ID</li>
             <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
-        </ol><b>Mobile Tips:</b> Use Files app to select .h5/.hdf5, or email the file to yourself and open from email.</div>""", unsafe_allow_html=True)
+        </ol>
+        <b>🖥️ Desktop:</b> Drag & drop .h5/.hdf5 file, or click "Browse files"<br>
+        <b>📱 Mobile (iOS):</b>
+        <ol>
+        <li>Open Files app → Locate your .h5 file</li>
+        <li>Tap the file → "Share" → Copy to ChagasVision</li>
+        <li>Or: Tap "Browse files" → Files app → Select .h5</li>
+        <li>If network error: Check WiFi connection, try different browser</li>
+        </ol>
+        <b>📱 Mobile (Android):</b>
+        <ol>
+        <li>Open Files/Google Drive → Find your .h5 file</li>
+        <li>Tap → Share/Send to ChagasVision app</li>
+        <li>Or: Tap "Browse files" → File manager → Select .h5</li>
+        <li>If network error: Refresh page, try WiFi instead of mobile data</li>
+        </ol>
+        <b>⚠️ If "Network Error" appears:</b>
+        <ul>
+        <li>Check internet connection (use WiFi, not mobile data)</li>
+        <li>Close and reopen app</li>
+        <li>Try a different browser (Chrome, Safari, Firefox)</li>
+        <li>Refresh the page (Cmd+R or Ctrl+R)</li>
+        <li>Check file size (should be &lt; 50MB)</li>
+        </ul>
+        </div>""", unsafe_allow_html=True)
 
     c1, c2 = st.columns([2, 1])
-    with c1: 
-        uploaded = st.file_uploader("📤 Upload 12-Lead ECG (.h5 or .hdf5)", type=["h5","hdf5"], 
-                                     accept_multiple_files=False, label_visibility="collapsed")
+    with c1:
+        try:
+            uploaded = st.file_uploader("📤 Upload 12-Lead ECG (.h5 or .hdf5)", 
+                                        type=["h5","hdf5"], 
+                                        accept_multiple_files=False, 
+                                        label_visibility="collapsed",
+                                        help="Drag & drop or click to browse. Supported: .h5, .hdf5 files")
+        except Exception as e:
+            st.error(f"⚠️ Upload error: {str(e)}")
+            st.info("Try: Refresh page → Check WiFi → Use different browser")
+            uploaded = None
 
     # Reset patient fields when file changes or is cleared
     current_file = uploaded.name if uploaded else None
