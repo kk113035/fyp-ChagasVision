@@ -582,6 +582,17 @@ def page_login():
 def page_scanner(models, results, default_threshold):
     preprocessor = ECGPreprocessor(); xai_engine = ComprehensiveXAI(models)
     with st.sidebar:
+        st.markdown("### ⚙️ Decision Threshold")
+        threshold = st.slider("Adjust threshold", 0.30, 0.70, float(default_threshold), 0.01,
+                              label_visibility="collapsed")
+        st.markdown(f"**Current:** {threshold*100:.0f}% &nbsp; | &nbsp; Optimal: {default_threshold*100:.0f}%")
+        if threshold < default_threshold:
+            st.caption("🔍 Screening mode — higher sensitivity, more false alarms")
+        elif threshold > default_threshold:
+            st.caption("✅ Confirmation mode — higher specificity, fewer false alarms")
+        else:
+            st.caption("⚖️ Balanced mode — optimised for balanced accuracy")
+        st.markdown("---")
         st.markdown("### 📊 Display Options")
         show = {k: st.checkbox(v, True) for k, v in [
             ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
@@ -600,26 +611,6 @@ def page_scanner(models, results, default_threshold):
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
         </ol></div>""", unsafe_allow_html=True)
-
-    # Threshold control — visible in main area
-    st.markdown('<p class="shdr">⚙️ Decision Threshold</p>', unsafe_allow_html=True)
-    th_c1, th_c2, th_c3 = st.columns([2, 1, 1])
-    with th_c1:
-        threshold = st.slider("Adjust threshold", 0.30, 0.70, float(default_threshold), 0.01,
-                              label_visibility="collapsed", key="main_threshold")
-    with th_c2:
-        st.markdown(f"**Current:** {threshold*100:.0f}%")
-        st.caption(f"Optimal: {default_threshold*100:.0f}%")
-    with th_c3:
-        if threshold < default_threshold:
-            st.markdown("🔍 **Screening mode**")
-            st.caption("Higher sensitivity, more false alarms")
-        elif threshold > default_threshold:
-            st.markdown("✅ **Confirmation mode**")
-            st.caption("Higher specificity, fewer false alarms")
-        else:
-            st.markdown("⚖️ **Balanced mode**")
-            st.caption("Optimised for balanced accuracy")
 
     c1, c2 = st.columns([2, 1])
     with c1: uploaded = st.file_uploader("Upload 12-Lead ECG", type=["h5","hdf5"], label_visibility="collapsed")
