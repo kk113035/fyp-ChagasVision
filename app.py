@@ -40,36 +40,8 @@ for key, val in [("authenticated", False), ("page", "home"),
         st.session_state[key] = val
 
 # ═══════════════════════════════════════════════════════════════════════════
-# DARK MODE CSS
+# CSS
 # ═══════════════════════════════════════════════════════════════════════════
-
-
-def add_footer():
-    st.markdown("---") # Visual separator
-    st.markdown(
-        """
-        <style>
-        .footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background-color: white;
-            color: black;
-            text-align: center;
-            padding: 10px;
-            font-size: 12px;
-            border-top: 1px solid #e6e6e6;
-        }
-        </style>
-        <div class="footer">
-            <p>DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. 
-            It does NOT replace professional medical diagnosis.<br>
-            © ChagasVision """ + str(datetime.now().year) + """</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
 st.markdown("""
     <style>
@@ -344,7 +316,7 @@ def navbar():
 
     if auth and role == "clinician":
         cols = st.columns([3, 1, 1, 1, 2])
-        with cols[0]: st.markdown("### 🫀 ChagasVision")
+        with cols[0]: st.markdown("### 🫀 ChagasVision - Clinician")
         with cols[1]:
             if st.button("Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
         with cols[2]:
@@ -360,7 +332,7 @@ def navbar():
 
     elif auth and role == "admin":
         cols = st.columns([3, 1, 1, 1, 1, 2])
-        with cols[0]: st.markdown("### 🫀 ChagasVision — Admin")
+        with cols[0]: st.markdown("### 🫀 ChagasVision — Administrator")
         with cols[1]:
             if st.button("Home", use_container_width=True): st.session_state["page"]="home"; st.rerun()
         with cols[2]:
@@ -1027,12 +999,12 @@ def page_login_log():
 
 def page_all_scans():
     st.markdown("####  Scan Activity Log - Admin View")
-    st.caption("Patient data and scan results are confidential — only scan metadata is visible to administrators.")
+    st.caption("Patient data and scan results are confidential. Only scan metadata is visible to administrators.")
     
     # Search and filter bar
     col1, col2 = st.columns([2, 1])
     with col1:
-        search_scans = st.text_input("🔍 Search by clinician username or date", "", placeholder="Type to filter...")
+        search_scans = st.text_input("Search by clinician username or date", "", placeholder="Type to filter...")
     with col2:
         sort_scans = st.selectbox("Sort by", ["Newest First", "Oldest First"])
     
