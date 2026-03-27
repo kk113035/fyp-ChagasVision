@@ -605,93 +605,35 @@ def page_scanner(models, results, default_threshold):
     st.markdown("#### ECG Analysis Console")
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
     
-    # Threshold selection at top
-    threshold_col1, threshold_col2, threshold_col3 = st.columns([1.5, 1.5, 2])
-    
-    with threshold_col1:
-        st.markdown("**📊 Decision Threshold**")
-        threshold_options = [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
-        threshold_labels = [f"{t*100:.0f}%" for t in threshold_options]
-        
-        selected_idx = threshold_options.index(float(default_threshold)) if float(default_threshold) in threshold_options else 4
-        threshold_select = st.selectbox(
-            "Select Threshold",
-            options=threshold_labels,
-            index=selected_idx,
-            label_visibility="collapsed",
-            key="threshold_selector"
+    # Simple threshold dropdown with slider inside
+    with st.expander("⚙️ Threshold Settings", expanded=False):
+        threshold = st.slider(
+            "Adjust Threshold",
+            min_value=0.30,
+            max_value=0.70,
+            value=float(default_threshold),
+            step=0.01,
+            label_visibility="collapsed"
         )
-        threshold = threshold_options[threshold_labels.index(threshold_select)]
-    
-    with threshold_col2:
-        st.markdown("**📌 Current vs Optimal**")
-        col_current, col_optimal = st.columns(2)
-        col_current.metric("Current", f"{threshold*100:.0f}%")
-        col_optimal.metric("Optimal", f"{default_threshold*100:.0f}%")
-    
-    with threshold_col3:
-        st.markdown("**⚙️ Mode**")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Current", f"{threshold*100:.0f}%")
+        col2.metric("Optimal", f"{default_threshold*100:.0f}%")
         if threshold < default_threshold:
-            st.info("🔴 **Screening Mode** — Higher sensitivity, more false alarms")
+            col3.info("🔴 Screening")
         elif threshold > default_threshold:
-            st.info("🟢 **Confirmation Mode** — Higher specificity, fewer false alarms")
+            col3.info("🟢 Confirm")
         else:
-            st.info("🟡 **Balanced Mode** — Optimised for balanced accuracy")
+            col3.info("🟡 Balanced")
     
     st.markdown("---")
     
-    # Display options
-    with st.expander("⚙️ Display Options", expanded=True):
-        col_disp1, col_disp2, col_disp3 = st.columns(3)
-        
-        show = {}
-        display_items = [
-            ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
-            ("gcam","Grad-CAM overlay"),("gcam_d","Grad-CAM detail"),("patt","Clinical patterns"),
-            ("recs","Recommendations"),("t_occ","Temporal occlusion"),("ens_dis","Disagreement"),
-            ("per_method","Per-method"),("findings","Findings & notes"),("peaks","Attention peaks")
-        ]
-        
-        for i, (key, label) in enumerate(display_items):
-            if i % 3 == 0:
-                show[key] = col_disp1.checkbox(label, True)
-            elif i % 3 == 1:
-                show[key] = col_disp2.checkbox(label, True)
-            else:
-                show[key] = col_disp3.checkbox(label, True)
-    with st.expander("📱 How to use the scanner (including mobile)", expanded=False):
-        st.markdown("""<div class="instr-box"><ol>
-            <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
-            <li><b>Upload</b> — drag/drop or click below</li>
-            <li><b>Enter info</b> — age, sex, optional Patient ID</li>
-            <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
-            <li><b>Review</b> — probability, attention overlay, patterns</li>
-            <li><b>Download</b> — clinical report for records</li>
-        </ol>
-        <b>🖥️ Desktop:</b> Drag & drop .h5/.hdf5 file, or click "Browse files"<br>
-        <b>📱 Mobile (iOS):</b>
-        <ol>
-        <li>Open Files app → Locate your .h5 file</li>
-        <li>Tap the file → "Share" → Copy to ChagasVision</li>
-        <li>Or: Tap "Browse files" → Files app → Select .h5</li>
-        <li>If network error: Check WiFi connection, try different browser</li>
-        </ol>
-        <b>📱 Mobile (Android):</b>
-        <ol>
-        <li>Open Files/Google Drive → Find your .h5 file</li>
-        <li>Tap → Share/Send to ChagasVision app</li>
-        <li>Or: Tap "Browse files" → File manager → Select .h5</li>
-        <li>If network error: Refresh page, try WiFi instead of mobile data</li>
-        </ol>
-        <b>⚠️ If "Network Error" appears:</b>
-        <ul>
-        <li>Check internet connection (use WiFi, not mobile data)</li>
-        <li>Close and reopen app</li>
-        <li>Try a different browser (Chrome, Safari, Firefox)</li>
-        <li>Refresh the page (Cmd+R or Ctrl+R)</li>
-        <li>Check file size (should be &lt; 50MB)</li>
-        </ul>
-        </div>""", unsafe_allow_html=True)
+    # Show all visualizations by default
+    show = {
+        "prob": True, "models": True, "xai": True,
+        "gcam": True, "gcam_d": True, "patt": True,
+        "recs": True, "t_occ": True, "ens_dis": True,
+        "per_method": True, "findings": True, "peaks": True
+    }
 
     c1, c2 = st.columns([2, 1])
     with c1:
