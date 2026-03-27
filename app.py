@@ -34,7 +34,8 @@ from xai import ComprehensiveXAI
 st.set_page_config(page_title="ChagasVision", page_icon="🫀", layout="wide", initial_sidebar_state="expanded")
 
 for key, val in [("authenticated", False), ("page", "home"),
-                 ("username", ""), ("full_name", ""), ("role", "")]:
+                 ("username", ""), ("full_name", ""), ("role", ""),
+                 ("show_disclaimer", True)]:
     if key not in st.session_state:
         st.session_state[key] = val
 
@@ -42,14 +43,7 @@ for key, val in [("authenticated", False), ("page", "home"),
 # DARK MODE CSS
 # ═══════════════════════════════════════════════════════════════════════════
 
-import streamlit as st
 
-st.markdown("""
-    <style>
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    </style>
-""", unsafe_allow_html=True)
 
 st.markdown("""
 <style>
@@ -112,7 +106,7 @@ input, textarea, select, [data-baseweb="select"],
 .instr-box ol { padding-left: 1.2rem; margin: 0.5rem 0; }
 .instr-box li { margin: 0.4rem 0; }
 .instr-box b { color: #e2e8f0; }
-.disc { background: #0c1a33; border: 1px solid #1e40af; border-radius: 8px; padding: 0.9rem; font-size: 0.82rem; color: #93c5fd; margin-top: 1rem; }
+.disc { background: #0c1a33; border: 1px solid #1e40af; border-radius: 8px; padding: 0.9rem; font-size: 0.82rem; color: #93c5fd; margin-top: 1rem; margin-bottom: 1rem; }
 .login-divider { display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0; color: #334155; font-size: 0.8rem; }
 .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: #1e3a5f; }
 
@@ -282,6 +276,30 @@ def load_ensemble():
     if not models: return None, None, 0.5, "error"
     res = json.load(open(edir/"ensemble_results.json")) if (edir/"ensemble_results.json").exists() else {}
     return models, res, cfg.get("optimal_threshold", 0.5), "ok"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# PERSISTENT DISCLAIMER
+# ═══════════════════════════════════════════════════════════════════════════
+
+def show_persistent_disclaimer():
+    """Display disclaimer in sidebar that can always be toggled"""
+    with st.sidebar:
+        st.markdown("---")
+        if st.toggle("📋 Show Medical Disclaimer", value=st.session_state.get("show_disclaimer", True)):
+            st.markdown("""
+            <div class="disc">
+            <b>⚕️ Important Medical Disclaimer:</b><br>
+            ChagasVision is a <b>clinical decision support tool for research purposes only</b>. 
+            It does <b>NOT replace professional medical diagnosis</b>. All results must be confirmed with:
+            <ul style="margin: 0.5rem 0; padding-left: 1.2rem;">
+            <li>Serological testing (serology)</li>
+            <li>Clinical evaluation by qualified healthcare providers</li>
+            <li>Additional diagnostic procedures as recommended</li>
+            </ul>
+            <b>Users assume full responsibility</b> for clinical interpretation and patient management.
+            </div>
+            """, unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -544,8 +562,6 @@ def page_home():
         with c:
             if st.button("Login to Access the System →", type="primary", use_container_width=True):
                 st.session_state["page"] = "login"; st.rerun()
-    st.markdown('<div class="disc"><b>Disclaimer:</b> Clinical decision support tool for research only. '
-                'Does not replace professional diagnosis. Confirm with serological testing.</div>', unsafe_allow_html=True)
 
 
 def page_login():
@@ -602,15 +618,17 @@ def page_scanner(models, results, default_threshold):
     with st.expander("How to use the scanner", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
             <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
-            <li><b>Upload</b> — drag/drop or click below</li>
+            <li><b>Upload</b> — drag/drop or click below (works on mobile too)</li>
             <li><b>Enter info</b> — age, sex, optional Patient ID</li>
             <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
-        </ol></div>""", unsafe_allow_html=True)
+        </ol><b>Mobile Tips:</b> Use Files app to select .h5/.hdf5, or email the file to yourself and open from email.</div>""", unsafe_allow_html=True)
 
     c1, c2 = st.columns([2, 1])
-    with c1: uploaded = st.file_uploader("Upload 12-Lead ECG", type=["h5","hdf5"], label_visibility="collapsed")
+    with c1: 
+        uploaded = st.file_uploader("📤 Upload 12-Lead ECG (.h5 or .hdf5)", type=["h5","hdf5"], 
+                                     accept_multiple_files=False, label_visibility="collapsed")
 
     # Reset patient fields when file changes or is cleared
     current_file = uploaded.name if uploaded else None
@@ -739,13 +757,48 @@ def page_scanner(models, results, default_threshold):
 
 def page_history():
     st.markdown("#### My Scan History")
+    
+    # Search and filter bar
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        search_query = st.text_input("🔍 Search by Patient ID or Date", "", placeholder="Type to filter...")
+    with col2:
+        status_filter = st.selectbox("Filter by Status", ["All", "Positive", "Negative", "Borderline"])
+    with col3:
+        sort_order = st.selectbox("Sort by", ["Newest First", "Oldest First"])
+    
     scans = get_scans(user=st.session_state["username"])
-    if not scans: st.info("No scans yet. Run an analysis from the Scanner."); return
-    pos = sum(1 for s in scans if "POS" in s.get("prediction","").upper())
+    if not scans: 
+        st.info("No scans yet. Run an analysis from the Scanner."); return
+    
+    # Apply filters
+    filtered_scans = scans[:]
+    
+    # Status filter
+    if status_filter != "All":
+        filtered_scans = [s for s in filtered_scans if status_filter.upper() in s.get("prediction", "").upper()]
+    
+    # Search filter
+    if search_query:
+        search_lower = search_query.lower()
+        filtered_scans = [s for s in filtered_scans if 
+                         search_lower in str(s.get('patient_id', '')).lower() or 
+                         search_lower in str(s.get('scan_date', '')).lower()]
+    
+    # Sort
+    if sort_order == "Oldest First":
+        filtered_scans.reverse()
+    
+    pos = sum(1 for s in filtered_scans if "POS" in s.get("prediction","").upper())
     c1,c2,c3 = st.columns(3)
-    c1.metric("Total", len(scans)); c2.metric("Positive", pos); c3.metric("Negative", len(scans)-pos)
+    c1.metric("Total", len(filtered_scans)); c2.metric("Positive", pos); c3.metric("Negative", len(filtered_scans)-pos)
     st.markdown("---")
-    for s in scans:
+    
+    if not filtered_scans:
+        st.info("No results match your filters.")
+        return
+    
+    for s in filtered_scans:
         ip = "POS" in s.get("prediction","").upper()
         ps = f"{s['probability']*100:.1f}%" if s.get("probability") else "?"
         with st.expander(f"{'🔴' if ip else '🟢'} {s['scan_date'][:16]} • {s.get('patient_id','?')} • {ps}"):
@@ -761,11 +814,23 @@ def page_history():
 
 def page_manage_users():
     st.markdown("####  User Management")
+    
+    # Search bar
+    search_users = st.text_input("🔍 Search users by username or name", "", placeholder="Type to filter...")
+    
     users = get_all_users()
+    
+    # Apply search filter
+    if search_users:
+        search_lower = search_users.lower()
+        users = [u for u in users if 
+                search_lower in str(u.get('username', '')).lower() or 
+                search_lower in str(u.get('full_name', '')).lower()]
+    
     st.metric("Total Users", len(users))
 
     # Add new user
-    with st.expander("Add new user", expanded=False):
+    with st.expander("➕ Add new user", expanded=False):
         with st.form("add_user", clear_on_submit=True):
             role_add = st.selectbox("Role", ["Clinician", "Administrator"], key="add_role")
             nu = st.text_input("Username", key="add_u", placeholder="Login username")
@@ -791,6 +856,10 @@ def page_manage_users():
 
     st.markdown("---")
     st.markdown("##### Registered Users")
+
+    if not users:
+        st.info("No users match your search.")
+        return
 
     for user in users:
         id_label = "Employee ID" if user["role"] == "admin" else "Doctor ID"
@@ -844,17 +913,45 @@ def page_manage_users():
 
 def page_login_log():
     st.markdown("#### Login Audit Log")
+    
+    # Search and filter bar
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        search_log = st.text_input("🔍 Search by username or action", "", placeholder="Type to filter...")
+    with col2:
+        log_filter = st.selectbox("Filter by Action", ["All", "login_success", "login_failed", "logout", "created_user", "edited_user", "deleted_user"])
+    
     logs = get_login_log()
-    if not logs: st.info("No login events recorded."); return
-    st.metric("Total Events", len(logs))
+    if not logs: 
+        st.info("No login events recorded."); return
+    
+    # Apply filters
+    filtered_logs = logs[:]
+    
+    # Action filter
+    if log_filter != "All":
+        filtered_logs = [l for l in filtered_logs if log_filter in l.get("action", "")]
+    
+    # Search filter
+    if search_log:
+        search_lower = search_log.lower()
+        filtered_logs = [l for l in filtered_logs if 
+                        search_lower in str(l.get('username', '')).lower() or 
+                        search_lower in str(l.get('action', '')).lower()]
+    
+    st.metric("Total Events", len(filtered_logs))
+    
+    if not filtered_logs:
+        st.info("No results match your filters.")
+        return
+    
     st.markdown("---")
-    for entry in logs:
+    for entry in filtered_logs:
         action = entry.get("action", "")
         if "success" in action: icon = "✅"
         elif "failed" in action: icon = "❌"
         elif "logout" in action: icon = "🚪"
-        elif "registered" in action: icon = "📝"
-        elif "created" in action: icon = "➕"
+        elif "registered" in action or "created" in action: icon = "➕"
         elif "edited" in action: icon = "✏️"
         elif "deleted" in action: icon = "🗑️"
         else: icon = "📌"
@@ -864,12 +961,41 @@ def page_login_log():
 def page_all_scans():
     st.markdown("####  Scan Activity Log - Admin View")
     st.caption("Patient data and scan results are confidential — only scan metadata is visible to administrators.")
+    
+    # Search and filter bar
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        search_scans = st.text_input("🔍 Search by clinician username or date", "", placeholder="Type to filter...")
+    with col2:
+        sort_scans = st.selectbox("Sort by", ["Newest First", "Oldest First"])
+    
     scans = get_scans(user=None, limit=200)
-    if not scans: st.info("No scans recorded."); return
-    st.metric("Total Scans Performed", len(scans))
+    if not scans: 
+        st.info("No scans recorded."); return
+    
+    # Apply filters
+    filtered_scans = scans[:]
+    
+    # Search filter
+    if search_scans:
+        search_lower = search_scans.lower()
+        filtered_scans = [s for s in filtered_scans if 
+                         search_lower in str(s.get('user', '')).lower() or 
+                         search_lower in str(s.get('scan_date', '')).lower()]
+    
+    # Sort
+    if sort_scans == "Oldest First":
+        filtered_scans.reverse()
+    
+    st.metric("Total Scans Performed", len(filtered_scans))
+    
+    if not filtered_scans:
+        st.info("No results match your search.")
+        return
+    
     st.markdown("---")
     # Show only: clinician, date, time — no patient info, no results
-    for s in scans:
+    for s in filtered_scans:
         scan_date = s.get("scan_date", "")[:16]
         clinician = s.get("user", "Unknown")
         st.markdown(f"🩺 **{scan_date}** — Clinician: `{clinician}`")
@@ -881,6 +1007,7 @@ def page_all_scans():
 
 def main():
     init_db(); navbar()
+    show_persistent_disclaimer()
     page = st.session_state["page"]; auth = st.session_state["authenticated"]; role = st.session_state.get("role","")
 
     if page == "home": page_home()
