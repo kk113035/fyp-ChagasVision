@@ -601,27 +601,64 @@ def page_login():
 
 def page_scanner(models, results, default_threshold):
     preprocessor = ECGPreprocessor(); xai_engine = ComprehensiveXAI(models)
-    with st.sidebar:
-        st.markdown("### Decision Threshold")
-        threshold = st.slider("Adjust threshold", 0.30, 0.70, float(default_threshold), 0.01,
-                              label_visibility="collapsed")
-        st.markdown(f"**Current:** {threshold*100:.0f}% &nbsp; | &nbsp; Optimal: {default_threshold*100:.0f}%")
-        if threshold < default_threshold:
-            st.caption("Screening mode — higher sensitivity, more false alarms")
-        elif threshold > default_threshold:
-            st.caption("Confirmation mode — higher specificity, fewer false alarms")
-        else:
-            st.caption("Balanced mode — optimised for balanced accuracy")
-        st.markdown("---")
-        st.markdown("### Display Options")
-        show = {k: st.checkbox(v, True) for k, v in [
-            ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
-            ("gcam","Grad-CAM ECG overlay"),("gcam_d","Grad-CAM detail"),("patt","Clinical patterns"),
-            ("recs","Recommendations"),("t_occ","Temporal occlusion"),("ens_dis","Ensemble disagreement"),
-            ("per_method","Per-method breakdown"),("findings","Clinical findings & notes"),("peaks","Attention peaks")]}
 
     st.markdown("#### ECG Analysis Console")
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
+    
+    # Threshold selection at top
+    threshold_col1, threshold_col2, threshold_col3 = st.columns([1.5, 1.5, 2])
+    
+    with threshold_col1:
+        st.markdown("**📊 Decision Threshold**")
+        threshold_options = [0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70]
+        threshold_labels = [f"{t*100:.0f}%" for t in threshold_options]
+        
+        selected_idx = threshold_options.index(float(default_threshold)) if float(default_threshold) in threshold_options else 4
+        threshold_select = st.selectbox(
+            "Select Threshold",
+            options=threshold_labels,
+            index=selected_idx,
+            label_visibility="collapsed",
+            key="threshold_selector"
+        )
+        threshold = threshold_options[threshold_labels.index(threshold_select)]
+    
+    with threshold_col2:
+        st.markdown("**📌 Current vs Optimal**")
+        col_current, col_optimal = st.columns(2)
+        col_current.metric("Current", f"{threshold*100:.0f}%")
+        col_optimal.metric("Optimal", f"{default_threshold*100:.0f}%")
+    
+    with threshold_col3:
+        st.markdown("**⚙️ Mode**")
+        if threshold < default_threshold:
+            st.info("🔴 **Screening Mode** — Higher sensitivity, more false alarms")
+        elif threshold > default_threshold:
+            st.info("🟢 **Confirmation Mode** — Higher specificity, fewer false alarms")
+        else:
+            st.info("🟡 **Balanced Mode** — Optimised for balanced accuracy")
+    
+    st.markdown("---")
+    
+    # Display options
+    with st.expander("⚙️ Display Options", expanded=True):
+        col_disp1, col_disp2, col_disp3 = st.columns(3)
+        
+        show = {}
+        display_items = [
+            ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
+            ("gcam","Grad-CAM overlay"),("gcam_d","Grad-CAM detail"),("patt","Clinical patterns"),
+            ("recs","Recommendations"),("t_occ","Temporal occlusion"),("ens_dis","Disagreement"),
+            ("per_method","Per-method"),("findings","Findings & notes"),("peaks","Attention peaks")
+        ]
+        
+        for i, (key, label) in enumerate(display_items):
+            if i % 3 == 0:
+                show[key] = col_disp1.checkbox(label, True)
+            elif i % 3 == 1:
+                show[key] = col_disp2.checkbox(label, True)
+            else:
+                show[key] = col_disp3.checkbox(label, True)
     with st.expander("📱 How to use the scanner (including mobile)", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
             <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
