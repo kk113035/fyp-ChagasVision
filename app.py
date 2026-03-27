@@ -552,7 +552,7 @@ def page_login():
     _, col, _ = st.columns([1, 2, 1])
     with col:
         st.markdown("##### Sign in to your account")
-        st.caption("Authorised clinical personnel only")
+        st.caption("Authorised personnel only")
         with st.form("login"):
             u = st.text_input("Username", placeholder="Enter your username")
             p = st.text_input("Password", type="password", placeholder="Enter your password")
@@ -571,11 +571,8 @@ def page_login():
                         log_login(u, "unknown", "login_failed")
                         st.error("Invalid credentials. Please check your username and password.")
                 else: st.warning("Please enter both fields.")
-        st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
-        dc1, dc2 = st.columns(2)
-        with dc1: st.code("admin / admin123", language=None)
-        with dc2: st.code("clinician / chagas2025", language=None)
-        st.markdown('<div class="disc">🔒 New accounts can only be created by a system administrator. '
+        
+        st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
 
 
@@ -597,10 +594,10 @@ def page_scanner(models, results, default_threshold):
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
     with st.expander("How to use the scanner", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
-            <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
+            <li><b>Prepare</b> — HDF5 file (12-lead ECG)</li>
             <li><b>Upload</b> — drag/drop or click below</li>
             <li><b>Enter info</b> — age, sex, optional Patient ID</li>
-            <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
+            <li><b>Analyse</b> — 5-model ensemble +  XAI methods</li>
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
         </ol></div>""", unsafe_allow_html=True)
@@ -725,7 +722,7 @@ def page_scanner(models, results, default_threshold):
 
 
 def page_history():
-    st.markdown("#### 📋 My Scan History")
+    st.markdown("#### My Scan History")
     scans = get_scans(user=st.session_state["username"])
     if not scans: st.info("No scans yet. Run an analysis from the Scanner."); return
     pos = sum(1 for s in scans if "POS" in s.get("prediction","").upper())
@@ -747,12 +744,12 @@ def page_history():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def page_manage_users():
-    st.markdown("#### 👥 User Management")
+    st.markdown("#### User Management")
     users = get_all_users()
     st.metric("Total Users", len(users))
 
     # Add new user
-    with st.expander("➕ Register New Clinician / Staff", expanded=False):
+    with st.expander("Add New User", expanded=False):
         with st.form("add_user", clear_on_submit=True):
             role_add = st.selectbox("Role", ["Clinician", "Administrator"], key="add_role")
             nu = st.text_input("Username", key="add_u", placeholder="Login username")
@@ -831,7 +828,7 @@ def page_manage_users():
 
 
 def page_login_log():
-    st.markdown("#### 📝 Login Audit Log")
+    st.markdown("#### Login Audit Log")
     logs = get_login_log()
     if not logs: st.info("No login events recorded."); return
     st.metric("Total Events", len(logs))
