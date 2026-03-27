@@ -295,7 +295,7 @@ def show_persistent_disclaimer():
         with st.expander("📋 Medical Disclaimer", expanded=st.session_state.get("show_disclaimer", True)):
             st.markdown("""
             <div class="disc">
-            <b>⚕️ Important Medical Disclaimer:</b><br>
+            <b>Important Medical Disclaimer:</b><br>
             ChagasVision is a <b>clinical decision support tool for research purposes only</b>. 
             It does <b>NOT replace professional medical diagnosis</b>. All results must be confirmed with:
             <ul style="margin: 0.5rem 0; padding-left: 1.2rem;">
@@ -568,7 +568,7 @@ def page_home():
         with c:
             if st.button("Login to Access the System →", type="primary", use_container_width=True):
                 st.session_state["page"] = "login"; st.rerun()
-    st.markdown("DISCLAIMER: This is a clinical decision support tool only.", unsafe_allow_html=True)
+    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
     st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
@@ -599,7 +599,7 @@ def page_login():
         st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
         
-    st.markdown("DISCLAIMER: This is a clinical decision support tool only.", unsafe_allow_html=True)
+    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
     st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
