@@ -1,14 +1,3 @@
-"""
-ChagasVision Clinical Application
-===================================
-Role-based clinical interface:
-  - Clinician: ECG Scanner, Scan History (own scans only)
-  - Administrator: User Management (add/edit/delete), Login History
-
-Run locally::
-    streamlit run app.py
-"""
-
 import streamlit as st
 import torch
 import numpy as np
@@ -554,7 +543,7 @@ def page_login():
     _, col, _ = st.columns([1, 2, 1])
     with col:
         st.markdown("##### Sign in to your account")
-        st.caption("Authorised clinical personnel only")
+        st.caption("Authorised personnel only")
         with st.form("login"):
             u = st.text_input("Username", placeholder="Enter your username")
             p = st.text_input("Password", type="password", placeholder="Enter your password")
@@ -573,29 +562,26 @@ def page_login():
                         log_login(u, "unknown", "login_failed")
                         st.error("Invalid credentials. Please check your username and password.")
                 else: st.warning("Please enter both fields.")
-        st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
-        dc1, dc2 = st.columns(2)
-        with dc1: st.code("admin / admin123", language=None)
-        with dc2: st.code("clinician / chagas2025", language=None)
-        st.markdown('<div class="disc">🔒 New accounts can only be created by a system administrator. '
+        
+        st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
 
 
 def page_scanner(models, results, default_threshold):
     preprocessor = ECGPreprocessor(); xai_engine = ComprehensiveXAI(models)
     with st.sidebar:
-        st.markdown("### ⚙️ Decision Threshold")
+        st.markdown("### Decision Threshold")
         threshold = st.slider("Adjust threshold", 0.30, 0.70, float(default_threshold), 0.01,
                               label_visibility="collapsed")
         st.markdown(f"**Current:** {threshold*100:.0f}% &nbsp; | &nbsp; Optimal: {default_threshold*100:.0f}%")
         if threshold < default_threshold:
-            st.caption("🔍 Screening mode — higher sensitivity, more false alarms")
+            st.caption("Screening mode — higher sensitivity, more false alarms")
         elif threshold > default_threshold:
-            st.caption("✅ Confirmation mode — higher specificity, fewer false alarms")
+            st.caption("Confirmation mode — higher specificity, fewer false alarms")
         else:
-            st.caption("⚖️ Balanced mode — optimised for balanced accuracy")
+            st.caption("Balanced mode — optimised for balanced accuracy")
         st.markdown("---")
-        st.markdown("### 📊 Display Options")
+        st.markdown("### Display Options")
         show = {k: st.checkbox(v, True) for k, v in [
             ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
             ("gcam","Grad-CAM ECG overlay"),("gcam_d","Grad-CAM detail"),("patt","Clinical patterns"),
@@ -650,11 +636,11 @@ def page_scanner(models, results, default_threshold):
                 prob = result["probability"]
 
                 if prob >= threshold:
-                    st.markdown(f'<div class="res-pos"><h4 style="color:#ef4444;margin:0">⚠️ CHAGAS POSITIVE</h4><p style="color:#fca5a5">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="res-pos"><h4 style="color:#ef4444;margin:0">CHAGAS POSITIVE</h4><p style="color:#fca5a5">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
                 elif prob >= threshold - 0.1:
-                    st.markdown(f'<div class="res-bor"><h4 style="color:#eab308;margin:0">⚡ BORDERLINE</h4><p style="color:#fde68a">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="res-bor"><h4 style="color:#eab308;margin:0">BORDERLINE</h4><p style="color:#fde68a">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<div class="res-neg"><h4 style="color:#22c55e;margin:0">✅ CHAGAS NEGATIVE</h4><p style="color:#86efac">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="res-neg"><h4 style="color:#22c55e;margin:0">CHAGAS NEGATIVE</h4><p style="color:#86efac">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
 
                 m1,m2,m3,m4 = st.columns(4)
                 m1.metric("Probability", f"{prob*100:.1f}%"); m2.metric("Agreement", f"{result['model_consistency']*100:.0f}%")
@@ -663,32 +649,32 @@ def page_scanner(models, results, default_threshold):
                 # Threshold context
                 margin = prob - threshold
                 if margin >= 0:
-                    st.caption(f"⚙️ Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% above** threshold. "
+                    st.caption(f" Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% above** threshold. "
                                f"Would remain positive up to threshold {prob*100:.0f}%.")
                 else:
-                    st.caption(f"⚙️ Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% below** threshold. "
+                    st.caption(f" Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% below** threshold. "
                                f"Would turn positive at threshold {prob*100:.0f}% or lower.")
 
-                if show["prob"]: st.markdown('<p class="shdr">📊 Probability Gauge</p>', unsafe_allow_html=True); st.pyplot(plot_probability_gauge(prob, threshold)); plt.close()
-                if show["models"]: st.markdown('<p class="shdr">🤝 Ensemble Agreement</p>', unsafe_allow_html=True); st.pyplot(plot_model_agreement(result["predictions"], threshold)); plt.close()
+                if show["prob"]: st.markdown('<p class="shdr"> Probability Gauge</p>', unsafe_allow_html=True); st.pyplot(plot_probability_gauge(prob, threshold)); plt.close()
+                if show["models"]: st.markdown('<p class="shdr"> Ensemble Agreement</p>', unsafe_allow_html=True); st.pyplot(plot_model_agreement(result["predictions"], threshold)); plt.close()
                 if show["xai"]:
-                    st.markdown('<p class="shdr">🎯 Lead Importance</p>', unsafe_allow_html=True); st.pyplot(plot_lead_importance(result["lead_importance"])); plt.close()
+                    st.markdown('<p class="shdr"> Lead Importance</p>', unsafe_allow_html=True); st.pyplot(plot_lead_importance(result["lead_importance"])); plt.close()
                     st.caption(f"{result.get('n_methods','?')} methods: {', '.join(result.get('method_types',[]))}")
                 if show["per_method"] and result.get("per_method_importances"):
-                    st.markdown('<p class="shdr">📊 Per-Method Comparison</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr">Per-Method Comparison</p>', unsafe_allow_html=True)
                     fig = plot_per_method_comparison(result["per_method_importances"])
                     if fig: st.pyplot(fig); plt.close()
-                if show["gcam"]: st.markdown('<p class="shdr">🔥 Grad-CAM ECG Overlay</p>', unsafe_allow_html=True); st.pyplot(plot_ecg_gradcam(processed, result["lead_importance"], result.get("grad_cam"))); plt.close()
+                if show["gcam"]: st.markdown('<p class="shdr"> Grad-CAM ECG Overlay</p>', unsafe_allow_html=True); st.pyplot(plot_ecg_gradcam(processed, result["lead_importance"], result.get("grad_cam"))); plt.close()
                 if show["gcam_d"] and result.get("grad_cam") is not None:
-                    st.markdown('<p class="shdr">🔎 Grad-CAM Detail — Lead II</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr"> Grad-CAM Detail — Lead II</p>', unsafe_allow_html=True)
                     fig = plot_gradcam_detail(result["grad_cam"], processed[1])
                     if fig: st.pyplot(fig); plt.close()
                 if show["t_occ"] and result.get("temporal_occlusion") is not None:
-                    st.markdown('<p class="shdr">⏱️ Temporal Occlusion</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr">⏱Temporal Occlusion</p>', unsafe_allow_html=True)
                     fig = plot_temporal_occlusion(result["temporal_occlusion"])
                     if fig: st.pyplot(fig); plt.close()
                 if show["peaks"] and result.get("attention_peaks"):
-                    st.markdown('<p class="shdr">📍 Attention Peaks</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr"> Attention Peaks</p>', unsafe_allow_html=True)
                     for pk in result["attention_peaks"][:5]:
                         st.markdown(f"- **{pk['region']}** at {pk['position_pct']*100:.1f}% (strength {pk['strength']:.3f}) — {pk['clinical_significance']}")
                 if show["ens_dis"] and result.get("ensemble_analysis"):
@@ -700,7 +686,7 @@ def page_scanner(models, results, default_threshold):
                         if ea.get("high_confidence_leads"): st.markdown(f"✅ Agree on: {', '.join(ea['high_confidence_leads'][:4])}")
                         if ea.get("disagreement_leads"): st.markdown(f"⚠️ Disagree on: {', '.join(ea['disagreement_leads'][:4])}")
                 if show["patt"] and result.get("detected_patterns"):
-                    st.markdown('<p class="shdr">🏥 Clinical Patterns</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr"> Clinical Patterns</p>', unsafe_allow_html=True)
                     for p in result["detected_patterns"]:
                         title = f"🔬 {p['name']} — {p['strength']*100:.1f}%"
                         if p.get("temporal_region"): title += f" — {p['temporal_region']}"
@@ -714,10 +700,10 @@ def page_scanner(models, results, default_threshold):
                         st.markdown('<p class="shdr">🩺 Clinical Findings</p>', unsafe_allow_html=True)
                         for f in interp["clinical_findings"]: st.markdown(f"- {f}")
                     if interp.get("technical_notes"):
-                        st.markdown('<p class="shdr">⚙️ Technical Notes</p>', unsafe_allow_html=True)
+                        st.markdown('<p class="shdr"> Technical Notes</p>', unsafe_allow_html=True)
                         for n in interp["technical_notes"]: st.markdown(f"- {n}")
                 if show["recs"] and result.get("interpretation"):
-                    st.markdown('<p class="shdr">📋 Recommendations</p>', unsafe_allow_html=True)
+                    st.markdown('<p class="shdr"> Recommendations</p>', unsafe_allow_html=True)
                     interp = result["interpretation"]
                     if prob >= 0.5: st.error(f"**{interp['summary']}**")
                     elif prob >= 0.35: st.warning(f"**{interp['summary']}**")
@@ -732,7 +718,7 @@ def page_scanner(models, results, default_threshold):
                           age=age, sex=sex_s, prob=round(prob,4), prediction=result["prediction"],
                           threshold=threshold, confidence=result["confidence"],
                           agreement=round(result["model_consistency"],3), top_leads=top_str)
-                st.download_button("📄 Download Report", build_report(result, age, sex_s, threshold, pid),
+                st.download_button("Download Report", build_report(result, age, sex_s, threshold, pid),
                                    f"chagas_{pid or 'report'}_{now_sl():%Y%m%d_%H%M%S}.txt", use_container_width=True)
             except Exception as e:
                 st.error(f"Analysis failed: {e}")
@@ -743,7 +729,7 @@ def page_scanner(models, results, default_threshold):
 
 
 def page_history():
-    st.markdown("#### 📋 My Scan History")
+    st.markdown("#### My Scan History")
     scans = get_scans(user=st.session_state["username"])
     if not scans: st.info("No scans yet. Run an analysis from the Scanner."); return
     pos = sum(1 for s in scans if "POS" in s.get("prediction","").upper())
@@ -765,12 +751,12 @@ def page_history():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def page_manage_users():
-    st.markdown("#### 👥 User Management")
+    st.markdown("####  User Management")
     users = get_all_users()
     st.metric("Total Users", len(users))
 
     # Add new user
-    with st.expander("➕ Register New Clinician / Staff", expanded=False):
+    with st.expander("Add new user", expanded=False):
         with st.form("add_user", clear_on_submit=True):
             role_add = st.selectbox("Role", ["Clinician", "Administrator"], key="add_role")
             nu = st.text_input("Username", key="add_u", placeholder="Login username")
@@ -798,10 +784,9 @@ def page_manage_users():
     st.markdown("##### Registered Users")
 
     for user in users:
-        role_icon = "🔑" if user["role"] == "admin" else "🩺"
         id_label = "Employee ID" if user["role"] == "admin" else "Doctor ID"
         id_val = user.get("doctor_id", "")
-        with st.expander(f"{role_icon} {user['username']} — {user['full_name']} ({user['role']}) — {id_label}: {id_val or 'N/A'}"):
+        with st.expander(f" {user['username']} — {user['full_name']} ({user['role']}) — {id_label}: {id_val or 'N/A'}"):
             with st.form(f"edit_{user['id']}"):
                 st.caption(f"User ID: {user['id']} • Created: {user['created_at']}")
                 c1, c2 = st.columns(2)
@@ -818,7 +803,7 @@ def page_manage_users():
 
                 bc1, bc2 = st.columns(2)
                 with bc1:
-                    if st.form_submit_button("💾 Save Changes", use_container_width=True):
+                    if st.form_submit_button(" Save Changes", use_container_width=True):
                         if new_pw and new_pw != new_pw2:
                             st.error("Passwords do not match.")
                         elif new_pw and len(new_pw) < 6:
@@ -839,7 +824,7 @@ def page_manage_users():
                             else:
                                 st.error("Update failed — username may already be taken.")
                 with bc2:
-                    if st.form_submit_button("🗑️ Delete User", use_container_width=True):
+                    if st.form_submit_button(" Delete User", use_container_width=True):
                         if user["username"] == st.session_state["username"]:
                             st.error("Cannot delete your own account.")
                         else:
@@ -849,7 +834,7 @@ def page_manage_users():
 
 
 def page_login_log():
-    st.markdown("#### 📝 Login Audit Log")
+    st.markdown("#### Login Audit Log")
     logs = get_login_log()
     if not logs: st.info("No login events recorded."); return
     st.metric("Total Events", len(logs))
@@ -868,7 +853,7 @@ def page_login_log():
 
 
 def page_all_scans():
-    st.markdown("#### 📋 Scan Activity Log (Admin View)")
+    st.markdown("####  Scan Activity Log - Admin View")
     st.caption("Patient data and scan results are confidential — only scan metadata is visible to administrators.")
     scans = get_scans(user=None, limit=200)
     if not scans: st.info("No scans recorded."); return
