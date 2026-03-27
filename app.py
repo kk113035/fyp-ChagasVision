@@ -42,7 +42,7 @@ from xai import ComprehensiveXAI
 # CONFIG
 # ═══════════════════════════════════════════════════════════════════════════
 
-st.set_page_config(page_title="ChagasVision", page_icon="🫀", layout="wide")
+st.set_page_config(page_title="ChagasVision", page_icon="🫀", layout="wide", initial_sidebar_state="expanded")
 
 for key, val in [("authenticated", False), ("page", "home"),
                  ("username", ""), ("full_name", ""), ("role", "")]:
@@ -135,8 +135,10 @@ input, textarea, select, [data-baseweb="select"],
 }
 @media (max-width: 480px) { .hero h1 { font-size: 1.3rem; } .sgrid { grid-template-columns: 1fr 1fr; } }
 
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu, footer { visibility: hidden; }
 .stDeployButton { display: none; }
+/* Keep header visible for sidebar toggle button */
+[data-testid="stHeader"] { background: #0a0f1a !important; }
 </style>
 """, unsafe_allow_html=True)
 
