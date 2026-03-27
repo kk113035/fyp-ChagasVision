@@ -552,7 +552,7 @@ def page_login():
     _, col, _ = st.columns([1, 2, 1])
     with col:
         st.markdown("##### Sign in to your account")
-        st.caption("Authorised personnel only")
+        st.caption("Authorised clinical personnel only")
         with st.form("login"):
             u = st.text_input("Username", placeholder="Enter your username")
             p = st.text_input("Password", type="password", placeholder="Enter your password")
@@ -571,19 +571,18 @@ def page_login():
                         log_login(u, "unknown", "login_failed")
                         st.error("Invalid credentials. Please check your username and password.")
                 else: st.warning("Please enter both fields.")
-        
-        st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
+        st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
+        dc1, dc2 = st.columns(2)
+        with dc1: st.code("admin / admin123", language=None)
+        with dc2: st.code("clinician / chagas2025", language=None)
+        st.markdown('<div class="disc">🔒 New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
 
 
 def page_scanner(models, results, default_threshold):
     preprocessor = ECGPreprocessor(); xai_engine = ComprehensiveXAI(models)
     with st.sidebar:
-        st.markdown("### ⚙️ Settings")
-        threshold = st.slider("Decision Threshold", 0.30, 0.70, float(default_threshold), 0.01)
-        st.caption(f"Optimal: {default_threshold:.3f}")
-        st.markdown("---")
-        st.markdown("### Display Options")
+        st.markdown("### 📊 Display Options")
         show = {k: st.checkbox(v, True) for k, v in [
             ("prob","Probability gauge"),("models","Ensemble agreement"),("xai","Lead importance"),
             ("gcam","Grad-CAM ECG overlay"),("gcam_d","Grad-CAM detail"),("patt","Clinical patterns"),
@@ -594,13 +593,33 @@ def page_scanner(models, results, default_threshold):
     st.caption(f"Clinician: **{st.session_state['full_name']}** • {now_sl():%Y-%m-%d}")
     with st.expander("How to use the scanner", expanded=False):
         st.markdown("""<div class="instr-box"><ol>
-            <li><b>Prepare</b> — HDF5 file (12-lead ECG)</li>
+            <li><b>Prepare</b> — HDF5 file with 'tracings' dataset (12-lead ECG)</li>
             <li><b>Upload</b> — drag/drop or click below</li>
             <li><b>Enter info</b> — age, sex, optional Patient ID</li>
-            <li><b>Analyse</b> — 5-model ensemble +  XAI methods</li>
+            <li><b>Analyse</b> — 5-model ensemble + 4 XAI methods</li>
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
         </ol></div>""", unsafe_allow_html=True)
+
+    # Threshold control — visible in main area
+    st.markdown('<p class="shdr">⚙️ Decision Threshold</p>', unsafe_allow_html=True)
+    th_c1, th_c2, th_c3 = st.columns([2, 1, 1])
+    with th_c1:
+        threshold = st.slider("Adjust threshold", 0.30, 0.70, float(default_threshold), 0.01,
+                              label_visibility="collapsed", key="main_threshold")
+    with th_c2:
+        st.markdown(f"**Current:** {threshold*100:.0f}%")
+        st.caption(f"Optimal: {default_threshold*100:.0f}%")
+    with th_c3:
+        if threshold < default_threshold:
+            st.markdown("🔍 **Screening mode**")
+            st.caption("Higher sensitivity, more false alarms")
+        elif threshold > default_threshold:
+            st.markdown("✅ **Confirmation mode**")
+            st.caption("Higher specificity, fewer false alarms")
+        else:
+            st.markdown("⚖️ **Balanced mode**")
+            st.caption("Optimised for balanced accuracy")
 
     c1, c2 = st.columns([2, 1])
     with c1: uploaded = st.file_uploader("Upload 12-Lead ECG", type=["h5","hdf5"], label_visibility="collapsed")
@@ -647,6 +666,15 @@ def page_scanner(models, results, default_threshold):
                 m1,m2,m3,m4 = st.columns(4)
                 m1.metric("Probability", f"{prob*100:.1f}%"); m2.metric("Agreement", f"{result['model_consistency']*100:.0f}%")
                 m3.metric("XAI Consistency", f"{result['method_consistency']:.2f}"); m4.metric("Confidence", result["confidence"])
+
+                # Threshold context
+                margin = prob - threshold
+                if margin >= 0:
+                    st.caption(f"⚙️ Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% above** threshold. "
+                               f"Would remain positive up to threshold {prob*100:.0f}%.")
+                else:
+                    st.caption(f"⚙️ Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% below** threshold. "
+                               f"Would turn positive at threshold {prob*100:.0f}% or lower.")
 
                 if show["prob"]: st.markdown('<p class="shdr">📊 Probability Gauge</p>', unsafe_allow_html=True); st.pyplot(plot_probability_gauge(prob, threshold)); plt.close()
                 if show["models"]: st.markdown('<p class="shdr">🤝 Ensemble Agreement</p>', unsafe_allow_html=True); st.pyplot(plot_model_agreement(result["predictions"], threshold)); plt.close()
@@ -722,7 +750,7 @@ def page_scanner(models, results, default_threshold):
 
 
 def page_history():
-    st.markdown("#### My Scan History")
+    st.markdown("#### 📋 My Scan History")
     scans = get_scans(user=st.session_state["username"])
     if not scans: st.info("No scans yet. Run an analysis from the Scanner."); return
     pos = sum(1 for s in scans if "POS" in s.get("prediction","").upper())
@@ -744,12 +772,12 @@ def page_history():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def page_manage_users():
-    st.markdown("#### User Management")
+    st.markdown("#### 👥 User Management")
     users = get_all_users()
     st.metric("Total Users", len(users))
 
     # Add new user
-    with st.expander("Add New User", expanded=False):
+    with st.expander("➕ Register New Clinician / Staff", expanded=False):
         with st.form("add_user", clear_on_submit=True):
             role_add = st.selectbox("Role", ["Clinician", "Administrator"], key="add_role")
             nu = st.text_input("Username", key="add_u", placeholder="Login username")
@@ -828,7 +856,7 @@ def page_manage_users():
 
 
 def page_login_log():
-    st.markdown("#### Login Audit Log")
+    st.markdown("#### 📝 Login Audit Log")
     logs = get_login_log()
     if not logs: st.info("No login events recorded."); return
     st.metric("Total Events", len(logs))
