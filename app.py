@@ -535,7 +535,7 @@ def build_report(result, age, sex, threshold, pid=""):
         for n in interp["technical_notes"]: lines.append(f"  • {n}")
     lines += [f"\nASSESSMENT: {interp['summary']}", "\nRECOMMENDATIONS:"]
     for r in interp["recommendations"]: lines.append(f"  • {r}")
-    lines += ["\nDISCLAIMER: Clinical decision support only. Confirm with serology.", f"\n© ChagasVision {now_sl().year}"]
+    lines += ["\nDISCLAIMER: This is a clinical decision support tool only. Confirm with serology.", f"\n© ChagasVision {now_sl().year}"]
     return "\n".join(lines)
 
 
