@@ -149,6 +149,17 @@ DB_PATH = Path("chagasvision.db")
 
 def init_db():
     conn = sqlite3.connect(str(DB_PATH)); c = conn.cursor()
+
+    # Migration: if old schema exists without doctor_id, drop and recreate
+    c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+    if c.fetchone():
+        c.execute("PRAGMA table_info(users)")
+        cols = [row[1] for row in c.fetchall()]
+        if "doctor_id" not in cols:
+            c.execute("DROP TABLE users")
+            c.execute("DROP TABLE IF EXISTS scans")
+            c.execute("DROP TABLE IF EXISTS login_log")
+
     # Users table with doctor_id for clinicians
     c.execute("""CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -560,8 +571,11 @@ def page_login():
                         log_login(u, "unknown", "login_failed")
                         st.error("Invalid credentials. Please check your username and password.")
                 else: st.warning("Please enter both fields.")
-        
-        st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
+        st.markdown('<div class="login-divider">Demo Credentials</div>', unsafe_allow_html=True)
+        dc1, dc2 = st.columns(2)
+        with dc1: st.code("admin / admin123", language=None)
+        with dc2: st.code("clinician / chagas2025", language=None)
+        st.markdown('<div class="disc">🔒 New accounts can only be created by a system administrator. '
                     'Contact your admin to request access.</div>', unsafe_allow_html=True)
 
 
