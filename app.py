@@ -27,11 +27,9 @@ from model import build_model
 from preprocessing import ECGPreprocessor
 from xai import ComprehensiveXAI
 
-# ═══════════════════════════════════════════════════════════════════════════
 # CONFIG
-# ═══════════════════════════════════════════════════════════════════════════
 
-st.set_page_config(page_title="ChagasVision", page_icon="🫀", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="ChagasVision", page_icon="🫀", layout="wide")
 
 for key, val in [("authenticated", False), ("page", "home"),
                  ("username", ""), ("full_name", ""), ("role", ""),
@@ -39,9 +37,8 @@ for key, val in [("authenticated", False), ("page", "home"),
     if key not in st.session_state:
         st.session_state[key] = val
 
-# ═══════════════════════════════════════════════════════════════════════════
 # CSS
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 st.markdown("""
     <style>
@@ -83,24 +80,11 @@ input, textarea, select, [data-baseweb="select"],
 .hero .acc { color: #3b82f6; }
 .hero p { color: #94a3b8; margin: 0.6rem 0 0 0; max-width: 620px; font-size: 1.05rem; position: relative; z-index: 1; line-height: 1.6; }
 
-.sgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 1.2rem 0; }
-.scard { background: linear-gradient(135deg, #111827, #1e293b); border: 1px solid #1e3a5f; border-radius: 12px; padding: 1.2rem; text-align: center; transition: transform 0.15s, border-color 0.15s; }
-.scard:hover { transform: translateY(-3px); border-color: #3b82f6; }
-.scard .v { font-size: 1.7rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
-.scard .l { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1.2px; margin-top: 0.3rem; }
-.v-blue { color: #3b82f6; } .v-green { color: #10b981; } .v-red { color: #ef4444; } .v-purple { color: #a78bfa; }
-
 .card { background: #111827; border: 1px solid #1e3a5f; border-radius: 12px; padding: 1.4rem; margin: 0.5rem 0; }
 .res-pos { background: linear-gradient(135deg, #1c0a0a, #2d1111); border-left: 5px solid #dc2626; padding: 1.3rem; border-radius: 10px; margin: 1rem 0; box-shadow: 0 0 20px rgba(220,38,38,0.08); }
 .res-neg { background: linear-gradient(135deg, #051a0e, #0b2e1a); border-left: 5px solid #16a34a; padding: 1.3rem; border-radius: 10px; margin: 1rem 0; box-shadow: 0 0 20px rgba(22,163,74,0.08); }
 .res-bor { background: linear-gradient(135deg, #1a1500, #332b00); border-left: 5px solid #ca8a04; padding: 1.3rem; border-radius: 10px; margin: 1rem 0; }
 .shdr { font-size: 1rem; font-weight: 700; color: #e2e8f0 !important; border-bottom: 1px solid #1e3a5f; padding-bottom: 0.4rem; margin: 1.5rem 0 0.8rem 0; }
-
-.ctbl { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; border: 1px solid #1e3a5f; margin: 0.8rem 0; }
-.ctbl th { background: #1e293b; color: #94a3b8; padding: 0.7rem 0.8rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px; }
-.ctbl td { padding: 0.65rem 0.8rem; border-bottom: 1px solid #1e293b; font-size: 0.88rem; color: #cbd5e1; }
-.ctbl tr:nth-child(even) { background: #0f172a; }
-.ctbl .hl { background: #172554 !important; color: #93c5fd; font-weight: 700; }
 
 .upbox { background: #111827; border: 2px dashed #1e3a5f; border-radius: 14px; padding: 2.5rem; text-align: center; margin: 0.5rem 0; }
 .upbox .ic { font-size: 3rem; margin-bottom: 0.5rem; }
@@ -111,8 +95,6 @@ input, textarea, select, [data-baseweb="select"],
 .instr-box li { margin: 0.4rem 0; }
 .instr-box b { color: #e2e8f0; }
 .disc { background: #0c1a33; border: 1px solid #1e40af; border-radius: 8px; padding: 0.9rem; font-size: 0.82rem; color: #93c5fd; margin-top: 1rem; margin-bottom: 1rem; }
-.login-divider { display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0; color: #334155; font-size: 0.8rem; }
-.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: #1e3a5f; }
 
 .stTabs [data-baseweb="tab-list"] { gap: 4px; background: transparent; }
 .stTabs [data-baseweb="tab"] { background: #1e293b !important; border-radius: 8px !important; color: #94a3b8 !important; padding: 0.5rem 1rem !important; }
@@ -126,29 +108,21 @@ input, textarea, select, [data-baseweb="select"],
 
 @media (max-width: 768px) {
     .hero { padding: 1.5rem 1rem; } .hero h1 { font-size: 1.6rem; }
-    .sgrid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
-    .scard .v { font-size: 1.3rem; }
 }
-@media (max-width: 480px) { .hero h1 { font-size: 1.3rem; } .sgrid { grid-template-columns: 1fr 1fr; } }
 
 #MainMenu, footer { visibility: hidden; }
 .stDeployButton { display: none; }
-/* Keep header visible for sidebar toggle button */
 [data-testid="stHeader"] { background: #0a0f1a !important; }
 </style>
 """, unsafe_allow_html=True)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # DATABASE
-# ═══════════════════════════════════════════════════════════════════════════
 
 DB_PATH = Path("chagasvision.db")
 
 def init_db():
     conn = sqlite3.connect(str(DB_PATH)); c = conn.cursor()
-
-    # Migration: if old schema exists without doctor_id, drop and recreate
     c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
     if c.fetchone():
         c.execute("PRAGMA table_info(users)")
@@ -157,28 +131,21 @@ def init_db():
             c.execute("DROP TABLE users")
             c.execute("DROP TABLE IF EXISTS scans")
             c.execute("DROP TABLE IF EXISTS login_log")
-
-    # Users table with doctor_id for clinicians
     c.execute("""CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE, password_hash TEXT, full_name TEXT,
-        doctor_id TEXT DEFAULT '',
-        role TEXT DEFAULT 'clinician',
+        doctor_id TEXT DEFAULT '', role TEXT DEFAULT 'clinician',
         created_at TEXT DEFAULT '')""")
-    # Scan history
     c.execute("""CREATE TABLE IF NOT EXISTS scans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user TEXT, patient_id TEXT, age INT, sex TEXT,
         probability REAL, prediction TEXT, threshold REAL,
         confidence TEXT, agreement REAL, top_leads TEXT,
         scan_date TEXT DEFAULT '')""")
-    # Login audit log
     c.execute("""CREATE TABLE IF NOT EXISTS login_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT, role TEXT, action TEXT,
-        ip_info TEXT DEFAULT '',
-        timestamp TEXT DEFAULT '')""")
-    # Seed default accounts if empty
+        ip_info TEXT DEFAULT '', timestamp TEXT DEFAULT '')""")
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         for u, p, n, did, r in [
@@ -221,12 +188,6 @@ def get_all_users():
     rows = c.fetchall(); cols = [d[0] for d in c.description]; conn.close()
     return [dict(zip(cols, r)) for r in rows]
 
-def update_user(user_id, full_name, doctor_id, role):
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.execute("UPDATE users SET full_name=?, doctor_id=?, role=? WHERE id=?",
-                 (full_name, doctor_id, role, user_id))
-    conn.commit(); conn.close()
-
 def update_user_full(user_id, username, full_name, doctor_id, role, new_password=None):
     conn = sqlite3.connect(str(DB_PATH))
     try:
@@ -236,8 +197,7 @@ def update_user_full(user_id, username, full_name, doctor_id, role, new_password
             conn.execute("UPDATE users SET password_hash=? WHERE id=?",
                          (hashlib.sha256(new_password.encode()).hexdigest(), user_id))
         conn.commit(); conn.close(); return True
-    except:
-        conn.close(); return False
+    except: conn.close(); return False
 
 def delete_user(user_id):
     conn = sqlite3.connect(str(DB_PATH))
@@ -258,9 +218,7 @@ def get_scans(user=None, limit=50):
     return [dict(zip(cols, r)) for r in rows]
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # MODEL
-# ═══════════════════════════════════════════════════════════════════════════
 
 @st.cache_resource
 def load_ensemble():
@@ -282,38 +240,11 @@ def load_ensemble():
     return models, res, cfg.get("optimal_threshold", 0.5), "ok"
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# PERSISTENT DISCLAIMER
-# ═══════════════════════════════════════════════════════════════════════════
-
-def show_persistent_disclaimer():
-    """Display disclaimer in sidebar that can always be toggled"""
-    with st.sidebar:
-        st.markdown("---")
-        with st.expander("📋 Medical Disclaimer", expanded=st.session_state.get("show_disclaimer", True)):
-            st.markdown("""
-            <div class="disc">
-            <b>Important Medical Disclaimer:</b><br>
-            ChagasVision is a <b>clinical decision support tool for research purposes only</b>. 
-            It does <b>NOT replace professional medical diagnosis</b>. All results must be confirmed with:
-            <ul style="margin: 0.5rem 0; padding-left: 1.2rem;">
-            <li>Serological testing (serology)</li>
-            <li>Clinical evaluation by qualified healthcare providers</li>
-            <li>Additional diagnostic procedures as recommended</li>
-            </ul>
-            <b>Users assume full responsibility</b> for clinical interpretation and patient management.
-            </div>
-            """, unsafe_allow_html=True)
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# NAVBAR (role-aware)
-# ═══════════════════════════════════════════════════════════════════════════
+# NAVBAR
 
 def navbar():
     auth = st.session_state["authenticated"]
     role = st.session_state.get("role", "")
-
     if auth and role == "clinician":
         cols = st.columns([3, 1, 1, 1, 2])
         with cols[0]: st.markdown("### 🫀 ChagasVision - Clinician")
@@ -329,7 +260,6 @@ def navbar():
                 for k in ["authenticated","username","full_name","role"]:
                     st.session_state[k] = "" if k != "authenticated" else False
                 st.session_state["page"]="home"; st.rerun()
-
     elif auth and role == "admin":
         cols = st.columns([3, 1, 1, 1, 1, 2])
         with cols[0]: st.markdown("### 🫀 ChagasVision — Administrator")
@@ -357,9 +287,7 @@ def navbar():
     st.markdown("---")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # PLOTS
-# ═══════════════════════════════════════════════════════════════════════════
 
 BG = "#0a0f1a"; BG2 = "#111827"; FG = "#e2e8f0"; GR = "#1e3a5f"; TX2 = "#64748b"
 
@@ -408,33 +336,62 @@ def plot_lead_importance(lead_imp):
     plt.tight_layout(); return fig
 
 def plot_ecg_gradcam(signal, lead_imp, grad_cam=None):
+    """IMPROVED Grad-CAM ECG Overlay. Uses smooth colour-mapped highlighting
+    instead of pixel-by-pixel axvspan. Each lead gets attention intensity
+    proportional to its XAI importance * Grad-CAM temporal activation."""
     fig = plt.figure(figsize=(16, 14), facecolor=BG)
     t = np.arange(signal.shape[1]) / SAMPLING_RATE
+
+    # Upsample Grad-CAM to signal length for smooth overlay
     cam_up = None
     if grad_cam is not None and len(grad_cam) > 0:
-        cam_up = np.interp(np.linspace(0,1,signal.shape[1]), np.linspace(0,1,len(grad_cam)), grad_cam)
-        cam_up = (cam_up-cam_up.min())/(cam_up.max()-cam_up.min()+1e-8)
-    mx = max(lead_imp.values()) if lead_imp else 1; mn = min(lead_imp.values()) if lead_imp else 0
-    chl = {"V1","V2","V6","I","aVL","II"}
+        cam_up = np.interp(np.linspace(0, 1, signal.shape[1]),
+                           np.linspace(0, 1, len(grad_cam)), grad_cam)
+        cam_up = (cam_up - cam_up.min()) / (cam_up.max() - cam_up.min() + 1e-8)
+
+    mx = max(lead_imp.values()) if lead_imp else 1
+    mn = min(lead_imp.values()) if lead_imp else 0
+    chl = {"V1", "V2", "V6", "I", "aVL", "II"}
+
     for i, name in enumerate(LEAD_NAMES):
-        ax = fig.add_subplot(6,2,i+1); ax.set_facecolor(BG2)
-        ni = (lead_imp.get(name,0)-mn)/(mx-mn+1e-8)
-        lc = plt.cm.Reds(ni*0.6+0.2) if ni > 0.5 else "#64748b"
-        ax.plot(t, signal[i], color=lc, lw=0.9)
-        if cam_up is not None:
-            for j in range(len(t)-1):
-                if cam_up[j] > 0.4: ax.axvspan(t[j],t[j+1], alpha=cam_up[j]*0.3*ni, color="#dc2626", lw=0)
+        ax = fig.add_subplot(6, 2, i + 1); ax.set_facecolor(BG2)
+        ni = (lead_imp.get(name, 0) - mn) / (mx - mn + 1e-8)  # normalised importance
+
+        # ECG line colour: red-ish for important leads, grey for less important
+        lc = plt.cm.Reds(ni * 0.6 + 0.2) if ni > 0.5 else "#64748b"
+        ax.plot(t, signal[i], color=lc, lw=0.9, zorder=2)
+
+        # Smooth Grad-CAM highlighting using fill_between with alpha
+        if cam_up is not None and ni > 0.2:
+            # Create smooth attention band: signal ± scaled by cam attention
+            sig_range = signal[i].max() - signal[i].min()
+            if sig_range > 0:
+                alpha_vals = cam_up * ni * 0.5  # scale by lead importance
+                # Use fill_between with per-point alpha approximation
+                # Split into high/medium/low attention segments
+                for thresh_val, alpha_base, color in [(0.6, 0.35, "#dc2626"), (0.3, 0.15, "#f97316")]:
+                    mask = cam_up > thresh_val
+                    if mask.any():
+                        ax.fill_between(t, signal[i].min(), signal[i].max(),
+                                        where=mask, alpha=alpha_base * ni,
+                                        color=color, lw=0, zorder=1)
+
+        # Lead label
         lbl_c = "#dc2626" if name in chl else FG
         ax.set_ylabel(name, fontsize=10, fontweight="bold", color=lbl_c)
-        ax.text(0.98,0.9, f"{lead_imp.get(name,0)*100:.1f}%", transform=ax.transAxes, fontsize=8,
-                ha="right", va="top", color="#dc2626" if ni>0.5 else TX2, fontweight="bold" if ni>0.5 else "normal")
-        ax.grid(True, alpha=0.08, color=GR); ax.set_xlim(0, t[-1]); ax.tick_params(labelsize=7, colors=FG)
-        for sp in ["top","right"]: ax.spines[sp].set_visible(False)
-        for sp in ["bottom","left"]: ax.spines[sp].set_color(GR)
+        ax.text(0.98, 0.9, f"{lead_imp.get(name, 0) * 100:.1f}%", transform=ax.transAxes,
+                fontsize=8, ha="right", va="top",
+                color="#dc2626" if ni > 0.5 else TX2,
+                fontweight="bold" if ni > 0.5 else "normal")
+        ax.grid(True, alpha=0.08, color=GR); ax.set_xlim(0, t[-1])
+        ax.tick_params(labelsize=7, colors=FG)
+        for sp in ["top", "right"]: ax.spines[sp].set_visible(False)
+        for sp in ["bottom", "left"]: ax.spines[sp].set_color(GR)
         if i >= 10: ax.set_xlabel("Time (s)", fontsize=9, color=FG)
+
     fig.suptitle("12-Lead ECG — Grad-CAM Attention Overlay", fontsize=14, fontweight="800", color=FG, y=0.98)
-    fig.text(0.99, 0.005, "Red = AI attention  •  Red labels = Chagas-relevant", fontsize=8, ha="right", color=TX2)
-    plt.tight_layout(rect=[0,0.015,1,0.97]); return fig
+    fig.text(0.99, 0.005, "Red/Orange = AI attention regions  •  Red labels = Chagas-relevant leads", fontsize=8, ha="right", color=TX2)
+    plt.tight_layout(rect=[0, 0.015, 1, 0.97]); return fig
 
 def plot_gradcam_detail(cam, sig):
     if cam is None or len(cam) == 0: return None
@@ -469,76 +426,37 @@ def plot_temporal_occlusion(temp_occ, stride=32):
     for sp in ["bottom","left"]: ax.spines[sp].set_color(GR)
     plt.tight_layout(); return fig
 
-def plot_per_method_comparison(per_method_imps):
-    if not per_method_imps: return None
-    groups = {}
-    for key, imp in per_method_imps.items():
-        base = key.split("_m")[0].replace("_"," ").title()
-        if base not in groups: groups[base] = []
-        groups[base].append(imp)
-    type_imps = {}
-    for name, imps_list in groups.items():
-        avg = {}
-        for lead in LEAD_NAMES: avg[lead] = np.mean([d.get(lead, 0) for d in imps_list])
-        type_imps[name] = avg
-    n = len(type_imps)
-    if n == 0: return None
-    fig, axes = plt.subplots(1, n, figsize=(4*n, 5), facecolor=BG2, sharey=True)
-    if n == 1: axes = [axes]
-    chagas_set = {"V1","V2","V6","I","aVL","II"}
-    for ax, (method, imp) in zip(axes, type_imps.items()):
-        ax.set_facecolor(BG2); si = sorted(imp.items(), key=lambda x: x[1], reverse=True)
-        leads = [x[0] for x in si]; vals = [x[1]*100 for x in si]
-        colors = ["#dc2626" if l in chagas_set else "#3b82f6" for l in leads]
-        ax.barh(leads, vals, color=colors, alpha=0.8, height=0.6)
-        ax.invert_yaxis(); ax.set_title(method, fontsize=10, fontweight="700", color=FG); ax.tick_params(colors=FG)
-        for sp in ["top","right"]: ax.spines[sp].set_visible(False)
-        for sp in ["bottom","left"]: ax.spines[sp].set_color(GR)
-    axes[0].set_ylabel("Lead", color=FG)
-    fig.suptitle("Per-Method Lead Ranking Comparison", fontsize=12, fontweight="700", color=FG, y=1.02)
-    plt.tight_layout(); return fig
 
-
-# ═══════════════════════════════════════════════════════════════════════════
 # REPORT
-# ═══════════════════════════════════════════════════════════════════════════
 
 def build_report(result, age, sex, threshold, pid=""):
-    interp = result["interpretation"]; ea = result.get("ensemble_analysis", {})
     lines = [
         "      CHAGASVISION — CLINICAL ANALYSIS REPORT",
-        "═════════════════════════════════════════════════════",
+        "=" * 53,
         f"Date: {now_sl():%Y-%m-%d %H:%M}  Patient: {pid or 'N/A'}  Age: {age}  Sex: {sex}",
         f"\nRESULT: {result['prediction']}",
         f"Probability: {result['probability']*100:.1f}%  Confidence: {result['confidence']} ({result.get('confidence_score',0):.2f})",
-        f"  → {result.get('confidence_explanation','')}", f"Agreement: {result['model_consistency']*100:.0f}%  Threshold: {threshold}",
-        f"Ensemble vote: {ea.get('positive_votes','?')} ({ea.get('agreement_level','?')})",
-        f"XAI consistency: τ = {result.get('method_consistency',0):.2f}", f"Methods: {', '.join(result.get('method_types',[]))}",
+        f"  -> {result.get('confidence_explanation','')}",
+        f"Agreement: {result['model_consistency']*100:.0f}%  Threshold: {threshold}",
+        f"XAI consistency: tau = {result.get('method_consistency',0):.2f}",
+        f"Methods: {', '.join(result.get('method_types',[]))}",
         "\nTOP LEADS:"]
-    for l, v in result["sorted_leads"][:6]: lines.append(f"  {l:>4}  {'█'*int(v*40)} {v*100:.1f}%")
-    if ea.get("high_confidence_leads"): lines.append(f"\nAll models agree on: {', '.join(ea['high_confidence_leads'][:4])}")
-    if ea.get("disagreement_leads"): lines.append(f"Models disagree on: {', '.join(ea['disagreement_leads'][:4])}")
+    for l, v in result["sorted_leads"][:6]:
+        lines.append(f"  {l:>4}  {'#'*int(v*40)} {v*100:.1f}%")
     if result.get("detected_patterns"):
         lines.append("\nDETECTED PATTERNS:")
         for p in result["detected_patterns"]:
             line = f"  {p['name']} ({p['strength']*100:.1f}%) — {p['relevance']}"
             if p.get("temporal_region"): line += f" [{p['temporal_region']}]"
             lines.append(line)
-    if interp.get("clinical_findings"):
-        lines.append("\nCLINICAL FINDINGS:")
-        for f in interp["clinical_findings"]: lines.append(f"  • {f}")
-    if interp.get("technical_notes"):
-        lines.append("\nTECHNICAL NOTES:")
-        for n in interp["technical_notes"]: lines.append(f"  • {n}")
-    lines += [f"\nASSESSMENT: {interp['summary']}", "\nRECOMMENDATIONS:"]
-    for r in interp["recommendations"]: lines.append(f"  • {r}")
-    lines += ["\nDISCLAIMER: This is a clinical decision support tool only. Confirm with serology.", f"\n© ChagasVision {now_sl().year}"]
+    lines += ["\nDISCLAIMER: Clinical decision support only. Confirm with serology.",
+              f"\n© ChagasVision {now_sl().year}"]
     return "\n".join(lines)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
+
 # PAGES
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 def page_home():
     st.markdown("""
@@ -564,11 +482,10 @@ def page_home():
         st.markdown("---")
         _, c, _ = st.columns([1,2,1])
         with c:
-            if st.button("Login to Access the System →", type="primary", use_container_width=True):
+            if st.button("Login to Access the System", type="primary", use_container_width=True):
                 st.session_state["page"] = "login"; st.rerun()
-    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
-    st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
-
+    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only.", unsafe_allow_html=True)
+    st.markdown(f"© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 def page_login():
     _, col, _ = st.columns([1, 2, 1])
@@ -583,7 +500,7 @@ def page_login():
                     r = verify_user(u, p)
                     if r:
                         if r[1] not in ("clinician", "admin"):
-                            st.error("Unauthorised role. Contact your administrator.")
+                            st.error("Unauthorised role.")
                         else:
                             log_login(u, r[1], "login_success")
                             landing = "scanner" if r[1] == "clinician" else "manage_users"
@@ -591,14 +508,9 @@ def page_login():
                             st.rerun()
                     else:
                         log_login(u, "unknown", "login_failed")
-                        st.error("Invalid credentials. Please check your username and password.")
+                        st.error("Invalid credentials.")
                 else: st.warning("Please enter both fields.")
-        
-        st.markdown('<div class="disc">New accounts can only be created by a system administrator. '
-                    'Contact your admin to request access.</div>', unsafe_allow_html=True)
-        
-    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
-    st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
+        st.markdown('<div class="disc">New accounts can only be created by a system administrator.</div>', unsafe_allow_html=True)
 
 
 def page_scanner(models, results, default_threshold):
@@ -616,57 +528,15 @@ def page_scanner(models, results, default_threshold):
             <li><b>Review</b> — probability, attention overlay, patterns</li>
             <li><b>Download</b> — clinical report for records</li>
         </ol></div>""", unsafe_allow_html=True)
-    
-    # Simple threshold dropdown with slider inside
+
     with st.expander("Threshold Settings", expanded=False):
-        threshold = st.slider(
-            "Adjust Threshold",
-            min_value=0.30,
-            max_value=0.70,
-            value=float(default_threshold),
-            step=0.01,
-            label_visibility="collapsed"
-        )
-        
-    with st.expander("Display Options", expanded=False):
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            show_prob = st.checkbox("Probability Gauge", True)
-            show_models = st.checkbox("Ensemble Agreement", True)
-            show_xai = st.checkbox("Lead Importance", True)
-            show_gcam = st.checkbox("Grad-CAM Overlay", True)
-        with col2:
-            show_gcam_d = st.checkbox("Grad-CAM Detail", True)
-            show_patt = st.checkbox("Clinical Patterns", True)
-            show_recs = st.checkbox("Recommendations", True)
-            show_t_occ = st.checkbox("Temporal Occlusion", True)
-        with col3:
-            show_ens_dis = st.checkbox("Ensemble Disagreement", True)
-            show_per_method = st.checkbox("Per-Method Comparison", True)
-            show_findings = st.checkbox("Clinical Findings", True)
-            show_peaks = st.checkbox("Attention Peaks", True)
-    
-    show = {
-        "prob": show_prob, "models": show_models, "xai": show_xai,
-        "gcam": show_gcam, "gcam_d": show_gcam_d, "patt": show_patt,
-        "recs": show_recs, "t_occ": show_t_occ, "ens_dis": show_ens_dis,
-        "per_method": show_per_method, "findings": show_findings, "peaks": show_peaks
-    }
+        threshold = st.slider("Adjust Threshold", 0.30, 0.70, float(default_threshold), 0.01, label_visibility="collapsed")
 
     c1, c2 = st.columns([2, 1])
     with c1:
-        try:
-            uploaded = st.file_uploader("📤 Upload 12-Lead ECG (.h5 or .hdf5)", 
-                                        type=["h5","hdf5"], 
-                                        accept_multiple_files=False, 
-                                        label_visibility="collapsed",
-                                        help="Drag & drop or click to browse. Supported: .h5, .hdf5 files")
-        except Exception as e:
-            st.error(f"⚠️ Upload error: {str(e)}")
-            st.info("Try: Refresh page → Check WiFi → Use different browser")
-            uploaded = None
+        uploaded = st.file_uploader("Upload 12-Lead ECG", type=["h5","hdf5"], label_visibility="collapsed")
 
-    # Reset patient fields when file changes or is cleared
+    # Reset fields on file change
     current_file = uploaded.name if uploaded else None
     if "last_uploaded_file" not in st.session_state:
         st.session_state["last_uploaded_file"] = None
@@ -683,9 +553,9 @@ def page_scanner(models, results, default_threshold):
 
     if uploaded and st.button("Analyse ECG", type="primary", use_container_width=True):
         if age is None:
-            st.error("Please enter the patient's age before analysing.")
+            st.error("Please enter the patient's age.")
         elif sex_s == "Select":
-            st.error("Please select the patient's sex before analysing.")
+            st.error("Please select the patient's sex.")
         else:
             sex_v = 1 if sex_s == "Male" else 0
             try:
@@ -698,6 +568,7 @@ def page_scanner(models, results, default_threshold):
                     result = xai_engine.explain(processed, age, sex_v, threshold)
                 prob = result["probability"]
 
+                # Result banner
                 if prob >= threshold:
                     st.markdown(f'<div class="res-pos"><h4 style="color:#ef4444;margin:0">CHAGAS POSITIVE</h4><p style="color:#fca5a5">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
                 elif prob >= threshold - 0.1:
@@ -705,77 +576,41 @@ def page_scanner(models, results, default_threshold):
                 else:
                     st.markdown(f'<div class="res-neg"><h4 style="color:#22c55e;margin:0">CHAGAS NEGATIVE</h4><p style="color:#86efac">Prob: <b>{prob*100:.1f}%</b> • Confidence: <b>{result["confidence"]}</b> • Agreement: <b>{result["model_consistency"]*100:.0f}%</b></p></div>', unsafe_allow_html=True)
 
+                # Metrics
                 m1,m2,m3,m4 = st.columns(4)
-                m1.metric("Probability", f"{prob*100:.1f}%"); m2.metric("Agreement", f"{result['model_consistency']*100:.0f}%")
-                m3.metric("XAI Consistency", f"{result['method_consistency']:.2f}"); m4.metric("Confidence", result["confidence"])
+                m1.metric("Probability", f"{prob*100:.1f}%")
+                m2.metric("Agreement", f"{result['model_consistency']*100:.0f}%")
+                m3.metric("XAI Consistency", f"{result['method_consistency']:.2f}")
+                m4.metric("Confidence", result["confidence"])
 
-                # Threshold context
-                margin = prob - threshold
-                if margin >= 0:
-                    st.caption(f" Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% above** threshold. "
-                               f"Would remain positive up to threshold {prob*100:.0f}%.")
-                else:
-                    st.caption(f" Threshold: {threshold*100:.0f}% — Probability is **{abs(margin)*100:.1f}% below** threshold. "
-                               f"Would turn positive at threshold {prob*100:.0f}% or lower.")
+                # 1. Probability Gauge
+                st.markdown('<p class="shdr">Probability Gauge</p>', unsafe_allow_html=True)
+                st.pyplot(plot_probability_gauge(prob, threshold)); plt.close()
 
-                if show["prob"]: st.markdown('<p class="shdr"> Probability Gauge</p>', unsafe_allow_html=True); st.pyplot(plot_probability_gauge(prob, threshold)); plt.close()
-                if show["models"]: st.markdown('<p class="shdr"> Ensemble Agreement</p>', unsafe_allow_html=True); st.pyplot(plot_model_agreement(result["predictions"], threshold)); plt.close()
-                if show["xai"]:
-                    st.markdown('<p class="shdr"> Lead Importance</p>', unsafe_allow_html=True); st.pyplot(plot_lead_importance(result["lead_importance"])); plt.close()
-                    st.caption(f"{result.get('n_methods','?')} methods: {', '.join(result.get('method_types',[]))}")
-                if show["per_method"] and result.get("per_method_importances"):
-                    st.markdown('<p class="shdr">Per-Method Comparison</p>', unsafe_allow_html=True)
-                    fig = plot_per_method_comparison(result["per_method_importances"])
-                    if fig: st.pyplot(fig); plt.close()
-                if show["gcam"]: st.markdown('<p class="shdr"> Grad-CAM ECG Overlay</p>', unsafe_allow_html=True); st.pyplot(plot_ecg_gradcam(processed, result["lead_importance"], result.get("grad_cam"))); plt.close()
-                if show["gcam_d"] and result.get("grad_cam") is not None:
-                    st.markdown('<p class="shdr"> Grad-CAM Detail — Lead II</p>', unsafe_allow_html=True)
-                    fig = plot_gradcam_detail(result["grad_cam"], processed[1])
-                    if fig: st.pyplot(fig); plt.close()
-                if show["t_occ"] and result.get("temporal_occlusion") is not None:
-                    st.markdown('<p class="shdr">⏱Temporal Occlusion</p>', unsafe_allow_html=True)
+                # 2. Ensemble Agreement — each model's prediction
+                st.markdown('<p class="shdr">Ensemble Agreement</p>', unsafe_allow_html=True)
+                st.pyplot(plot_model_agreement(result["predictions"], threshold)); plt.close()
+
+                # 3. Lead Importance — aggregated from all 5 XAI methods
+                st.markdown('<p class="shdr">Lead Importance </p>', unsafe_allow_html=True)
+                st.pyplot(plot_lead_importance(result["lead_importance"])); plt.close()
+                st.caption(f"{result.get('n_methods','?')} methods: {', '.join(result.get('method_types',[]))}")
+
+                # 4. Grad-CAM ECG Overlay — WHERE the model looked
+                st.markdown('<p class="shdr">Grad-CAM ECG Overlay</p>', unsafe_allow_html=True)
+                st.pyplot(plot_ecg_gradcam(processed, result["lead_importance"], result.get("grad_cam"))); plt.close()
+
+                
+                # 5. Temporal Occlusion — which TIME regions matter
+                if result.get("temporal_occlusion") is not None:
+                    st.markdown('<p class="shdr">Temporal Occlusion</p>', unsafe_allow_html=True)
                     fig = plot_temporal_occlusion(result["temporal_occlusion"])
                     if fig: st.pyplot(fig); plt.close()
-                if show["peaks"] and result.get("attention_peaks"):
-                    st.markdown('<p class="shdr"> Attention Peaks</p>', unsafe_allow_html=True)
-                    for pk in result["attention_peaks"][:5]:
-                        st.markdown(f"- **{pk['region']}** at {pk['position_pct']*100:.1f}% (strength {pk['strength']:.3f}) — {pk['clinical_significance']}")
-                if show["ens_dis"] and result.get("ensemble_analysis"):
-                    st.markdown('<p class="shdr">🔀 Ensemble Disagreement</p>', unsafe_allow_html=True)
-                    ea = result["ensemble_analysis"]
-                    ec1, ec2 = st.columns(2)
-                    with ec1: st.markdown(f"**Vote:** {ea.get('positive_votes','?')} positive"); st.markdown(f"**Level:** {ea.get('agreement_level','?')} ({ea.get('unanimity',0)*100:.0f}%)")
-                    with ec2:
-                        if ea.get("high_confidence_leads"): st.markdown(f"✅ Agree on: {', '.join(ea['high_confidence_leads'][:4])}")
-                        if ea.get("disagreement_leads"): st.markdown(f"⚠️ Disagree on: {', '.join(ea['disagreement_leads'][:4])}")
-                if show["patt"] and result.get("detected_patterns"):
-                    st.markdown('<p class="shdr"> Clinical Patterns</p>', unsafe_allow_html=True)
-                    for p in result["detected_patterns"]:
-                        title = f"🔬 {p['name']} — {p['strength']*100:.1f}%"
-                        if p.get("temporal_region"): title += f" — {p['temporal_region']}"
-                        with st.expander(title, expanded=True):
-                            pc1, pc2 = st.columns(2)
-                            with pc1: st.markdown(f"**Leads:** {', '.join(p['leads'])}"); st.markdown(f"**Above threshold:** {p.get('n_leads_above_threshold','?')}/{len(p['leads'])}")
-                            with pc2: st.markdown(f"**Relevance:** {p['relevance']}")
-                if show["findings"] and result.get("interpretation"):
-                    interp = result["interpretation"]
-                    if interp.get("clinical_findings"):
-                        st.markdown('<p class="shdr">🩺 Clinical Findings</p>', unsafe_allow_html=True)
-                        for f in interp["clinical_findings"]: st.markdown(f"- {f}")
-                    if interp.get("technical_notes"):
-                        st.markdown('<p class="shdr"> Technical Notes</p>', unsafe_allow_html=True)
-                        for n in interp["technical_notes"]: st.markdown(f"- {n}")
-                if show["recs"] and result.get("interpretation"):
-                    st.markdown('<p class="shdr"> Recommendations</p>', unsafe_allow_html=True)
-                    interp = result["interpretation"]
-                    if prob >= 0.5: st.error(f"**{interp['summary']}**")
-                    elif prob >= 0.35: st.warning(f"**{interp['summary']}**")
-                    else: st.success(f"**{interp['summary']}**")
-                    for r in interp["recommendations"]: st.markdown(f"- {r}")
-                    conf_exp = result.get("confidence_explanation", "")
-                    if conf_exp: st.caption(f"Confidence: {result['confidence']} ({result.get('confidence_score',0):.2f}) — {conf_exp}")
 
-                st.markdown('<div class="disc">⚕️ <b>Important:</b> Clinical decision support only. Confirm with serological testing.</div>', unsafe_allow_html=True)
+
+                # Disclaimer + save + download
+                st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only.", unsafe_allow_html=True)
+                st.markdown(f"© ChagasVision {now_sl().year}", unsafe_allow_html=True)
                 top_str = ", ".join(f"{l}({v*100:.1f}%)" for l, v in result["sorted_leads"][:5])
                 save_scan(user=st.session_state["username"], patient_id=pid or f"anon_{now_sl():%H%M%S}",
                           age=age, sex=sex_s, prob=round(prob,4), prediction=result["prediction"],
@@ -789,55 +624,28 @@ def page_scanner(models, results, default_threshold):
     elif not uploaded:
         st.markdown('<div class="upbox"><div class="ic">📤</div><h4>Upload an ECG to begin</h4>'
                     '<p>Drag and drop HDF5 file, enter patient details, click Analyse</p></div>', unsafe_allow_html=True)
-        
-    st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only. It does NOT replace professional medical diagnosis.", unsafe_allow_html=True)
-    st.markdown(f"\n© ChagasVision {now_sl().year}", unsafe_allow_html=True)
 
 
 def page_history():
     st.markdown("#### My Scan History")
-    
-    # Search and filter bar
     col1, col2, col3 = st.columns([2, 1, 1])
-    with col1:
-        search_query = st.text_input("🔍 Search by Patient ID or Date", "", placeholder="Type to filter...")
-    with col2:
-        status_filter = st.selectbox("Filter by Status", ["All", "Positive", "Negative", "Borderline"])
-    with col3:
-        sort_order = st.selectbox("Sort by", ["Newest First", "Oldest First"])
-    
+    with col1: search_query = st.text_input("Search by Patient ID or Date", "", placeholder="Type to filter...")
+    with col2: status_filter = st.selectbox("Filter by Status", ["All", "Positive", "Negative"])
+    with col3: sort_order = st.selectbox("Sort by", ["Newest First", "Oldest First"])
     scans = get_scans(user=st.session_state["username"])
-    if not scans: 
-        st.info("No scans yet. Run an analysis from the Scanner."); return
-    
-    # Apply filters
-    filtered_scans = scans[:]
-    
-    # Status filter
+    if not scans: st.info("No scans yet."); return
+    filtered = scans[:]
     if status_filter != "All":
-        filtered_scans = [s for s in filtered_scans if status_filter.upper() in s.get("prediction", "").upper()]
-    
-    # Search filter
+        filtered = [s for s in filtered if status_filter.upper() in s.get("prediction","").upper()]
     if search_query:
-        search_lower = search_query.lower()
-        filtered_scans = [s for s in filtered_scans if 
-                         search_lower in str(s.get('patient_id', '')).lower() or 
-                         search_lower in str(s.get('scan_date', '')).lower()]
-    
-    # Sort
-    if sort_order == "Oldest First":
-        filtered_scans.reverse()
-    
-    pos = sum(1 for s in filtered_scans if "POS" in s.get("prediction","").upper())
+        q = search_query.lower()
+        filtered = [s for s in filtered if q in str(s.get('patient_id','')).lower() or q in str(s.get('scan_date','')).lower()]
+    if sort_order == "Oldest First": filtered.reverse()
+    pos = sum(1 for s in filtered if "POS" in s.get("prediction","").upper())
     c1,c2,c3 = st.columns(3)
-    c1.metric("Total", len(filtered_scans)); c2.metric("Positive", pos); c3.metric("Negative", len(filtered_scans)-pos)
+    c1.metric("Total", len(filtered)); c2.metric("Positive", pos); c3.metric("Negative", len(filtered)-pos)
     st.markdown("---")
-    
-    if not filtered_scans:
-        st.info("No results match your filters.")
-        return
-    
-    for s in filtered_scans:
+    for s in filtered:
         ip = "POS" in s.get("prediction","").upper()
         ps = f"{s['probability']*100:.1f}%" if s.get("probability") else "?"
         with st.expander(f"{'🔴' if ip else '🟢'} {s['scan_date'][:16]} • {s.get('patient_id','?')} • {ps}"):
@@ -847,218 +655,110 @@ def page_history():
             st.markdown(f"**Top leads:** {s.get('top_leads','')}"); st.markdown(f"**Result:** {s.get('prediction','')}")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # ADMIN PAGES
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 def page_manage_users():
-    st.markdown("####  User Management")
-    
-    # Search bar
-    search_users = st.text_input("🔍 Search users by username or name", "", placeholder="Type to filter...")
-    
+    st.markdown("#### User Management")
+    search_users = st.text_input("Search users", "", placeholder="Type to filter...")
     users = get_all_users()
-    
-    # Apply search filter
     if search_users:
-        search_lower = search_users.lower()
-        users = [u for u in users if 
-                search_lower in str(u.get('username', '')).lower() or 
-                search_lower in str(u.get('full_name', '')).lower()]
-    
+        q = search_users.lower()
+        users = [u for u in users if q in str(u.get('username','')).lower() or q in str(u.get('full_name','')).lower()]
     st.metric("Total Users", len(users))
-
-    # Add new user
-    with st.expander("➕ Add new user", expanded=False):
+    with st.expander("Add new user", expanded=False):
         with st.form("add_user", clear_on_submit=True):
             role_add = st.selectbox("Role", ["Clinician", "Administrator"], key="add_role")
-            nu = st.text_input("Username", key="add_u", placeholder="Login username")
-            nn = st.text_input("Full Name", key="add_n", placeholder="Dr. / Mr. / Ms.")
-            did = ""
-            if role_add == "Clinician":
-                did = st.text_input("Doctor ID", key="add_did", placeholder="e.g. DOC-003 (required)")
-            else:
-                did = st.text_input("Employee ID", key="add_did", placeholder="e.g. EMP-002 (required)")
-            pw = st.text_input("Password", type="password", key="add_pw", placeholder="Min 6 characters")
-            pw2 = st.text_input("Confirm Password", type="password", key="add_pw2", placeholder="Re-enter password")
+            nu = st.text_input("Username", key="add_u"); nn = st.text_input("Full Name", key="add_n")
+            did = st.text_input("Doctor/Employee ID", key="add_did")
+            pw = st.text_input("Password", type="password", key="add_pw")
+            pw2 = st.text_input("Confirm Password", type="password", key="add_pw2")
             if st.form_submit_button("Register User", use_container_width=True, type="primary"):
                 role_val = "clinician" if role_add == "Clinician" else "admin"
                 if not all([nu, nn, pw, pw2]): st.error("All fields required.")
-                elif not did: st.error(f"{'Doctor' if role_add == 'Clinician' else 'Employee'} ID is required.")
-                elif len(nu) < 3: st.error("Username must be at least 3 characters.")
+                elif not did: st.error("ID required.")
                 elif pw != pw2: st.error("Passwords do not match.")
                 elif len(pw) < 6: st.error("Password must be 6+ characters.")
                 elif register_user(nu, pw, nn, did, role_val):
                     log_login(st.session_state["username"], "admin", f"created_user:{nu}({role_val})")
-                    st.success(f"User '{nu}' registered as {role_add}.")
+                    st.success(f"User '{nu}' registered.")
                 else: st.error("Username already taken.")
-
     st.markdown("---")
-    st.markdown("##### Registered Users")
-
-    if not users:
-        st.info("No users match your search.")
-        return
-
     for user in users:
-        id_label = "Employee ID" if user["role"] == "admin" else "Doctor ID"
         id_val = user.get("doctor_id", "")
-        with st.expander(f" {user['username']} — {user['full_name']} ({user['role']}) — {id_label}: {id_val or 'N/A'}"):
+        with st.expander(f"{user['username']} — {user['full_name']} ({user['role']})"):
             with st.form(f"edit_{user['id']}"):
-                st.caption(f"User ID: {user['id']} • Created: {user['created_at']}")
                 c1, c2 = st.columns(2)
                 new_username = c1.text_input("Username", value=user["username"], key=f"uname_{user['id']}")
                 new_name = c2.text_input("Full Name", value=user["full_name"], key=f"name_{user['id']}")
                 c3, c4 = st.columns(2)
-                new_did = c3.text_input("Doctor / Employee ID", value=id_val, key=f"did_{user['id']}")
+                new_did = c3.text_input("ID", value=id_val, key=f"did_{user['id']}")
                 new_role = c4.selectbox("Role", ["clinician","admin"], index=0 if user["role"]=="clinician" else 1, key=f"role_{user['id']}")
-                st.markdown("---")
-                st.caption("Leave password fields empty to keep current password")
                 pc1, pc2 = st.columns(2)
-                new_pw = pc1.text_input("New Password", type="password", key=f"pw_{user['id']}", placeholder="Leave empty to keep current")
-                new_pw2 = pc2.text_input("Confirm New Password", type="password", key=f"pw2_{user['id']}", placeholder="Leave empty to keep current")
-
+                new_pw = pc1.text_input("New Password", type="password", key=f"pw_{user['id']}", placeholder="Leave empty to keep")
+                new_pw2 = pc2.text_input("Confirm", type="password", key=f"pw2_{user['id']}")
                 bc1, bc2 = st.columns(2)
                 with bc1:
-                    if st.form_submit_button(" Save Changes", use_container_width=True):
-                        if new_pw and new_pw != new_pw2:
-                            st.error("Passwords do not match.")
-                        elif new_pw and len(new_pw) < 6:
-                            st.error("Password must be at least 6 characters.")
-                        elif len(new_username) < 3:
-                            st.error("Username must be at least 3 characters.")
-                        elif not new_did:
-                            st.error("Doctor / Employee ID is required.")
+                    if st.form_submit_button("Save", use_container_width=True):
+                        if new_pw and new_pw != new_pw2: st.error("Passwords don't match.")
+                        elif new_pw and len(new_pw) < 6: st.error("Password too short.")
                         else:
                             pw_to_set = new_pw if new_pw else None
-                            ok = update_user_full(user["id"], new_username, new_name, new_did, new_role, pw_to_set)
-                            if ok:
-                                changes = f"edited_user:{user['username']}"
-                                if new_username != user["username"]: changes += f"→{new_username}"
-                                if pw_to_set: changes += "(pw_reset)"
-                                log_login(st.session_state["username"], "admin", changes)
-                                st.success("User updated."); st.rerun()
-                            else:
-                                st.error("Update failed — username may already be taken.")
+                            if update_user_full(user["id"], new_username, new_name, new_did, new_role, pw_to_set):
+                                log_login(st.session_state["username"], "admin", f"edited_user:{user['username']}")
+                                st.success("Updated."); st.rerun()
+                            else: st.error("Update failed.")
                 with bc2:
-                    if st.form_submit_button(" Delete User", use_container_width=True):
-                        if user["username"] == st.session_state["username"]:
-                            st.error("Cannot delete your own account.")
+                    if st.form_submit_button("Delete", use_container_width=True):
+                        if user["username"] == st.session_state["username"]: st.error("Cannot delete yourself.")
                         else:
                             delete_user(user["id"])
                             log_login(st.session_state["username"], "admin", f"deleted_user:{user['username']}")
-                            st.success(f"User '{user['username']}' deleted."); st.rerun()
-
+                            st.success("Deleted."); st.rerun()
 
 def page_login_log():
     st.markdown("#### Login Audit Log")
-    
-    # Search and filter bar
     col1, col2 = st.columns([2, 1])
-    with col1:
-        search_log = st.text_input("🔍 Search by username or action", "", placeholder="Type to filter...")
-    with col2:
-        log_filter = st.selectbox("Filter by Action", ["All", "login_success", "login_failed", "logout", "created_user", "edited_user", "deleted_user"])
-    
+    with col1: search_log = st.text_input("Search", "", placeholder="Filter...")
+    with col2: log_filter = st.selectbox("Filter", ["All", "login_success", "login_failed", "logout", "created_user", "edited_user", "deleted_user"])
     logs = get_login_log()
-    if not logs: 
-        st.info("No login events recorded."); return
-    
-    # Apply filters
-    filtered_logs = logs[:]
-    
-    # Action filter
-    if log_filter != "All":
-        filtered_logs = [l for l in filtered_logs if log_filter in l.get("action", "")]
-    
-    # Search filter
+    if not logs: st.info("No events."); return
+    filtered = logs[:]
+    if log_filter != "All": filtered = [l for l in filtered if log_filter in l.get("action","")]
     if search_log:
-        search_lower = search_log.lower()
-        filtered_logs = [l for l in filtered_logs if 
-                        search_lower in str(l.get('username', '')).lower() or 
-                        search_lower in str(l.get('action', '')).lower()]
-    
-    st.metric("Total Events", len(filtered_logs))
-    
-    if not filtered_logs:
-        st.info("No results match your filters.")
-        return
-    
+        q = search_log.lower()
+        filtered = [l for l in filtered if q in str(l.get('username','')).lower() or q in str(l.get('action','')).lower()]
+    st.metric("Events", len(filtered))
     st.markdown("---")
-    for entry in filtered_logs:
-        action = entry.get("action", "")
-        if "success" in action: icon = "✅"
-        elif "failed" in action: icon = "❌"
-        elif "logout" in action: icon = "🚪"
-        elif "registered" in action or "created" in action: icon = "➕"
-        elif "edited" in action: icon = "✏️"
-        elif "deleted" in action: icon = "🗑️"
-        else: icon = "📌"
+    for entry in filtered:
+        action = entry.get("action","")
+        icon = "✅" if "success" in action else "❌" if "failed" in action else "🚪" if "logout" in action else "➕" if "created" in action else "✏️" if "edited" in action else "🗑️" if "deleted" in action else "📌"
         st.markdown(f"{icon} **{entry.get('timestamp','')[:16]}** — `{entry.get('username','')}` ({entry.get('role','')}) — {action}")
 
-
 def page_all_scans():
-    st.markdown("####  Scan Activity Log - Admin View")
-    st.caption("Patient data and scan results are confidential. Only scan metadata is visible to administrators.")
-    
-    # Search and filter bar
-    col1, col2 = st.columns([2, 1])
-    with col1:
-        search_scans = st.text_input("Search by clinician username or date", "", placeholder="Type to filter...")
-    with col2:
-        sort_scans = st.selectbox("Sort by", ["Newest First", "Oldest First"])
-    
+    st.markdown("#### Scan Activity Log - Admin View")
+    st.caption("Patient data is confidential. Only scan metadata visible.")
     scans = get_scans(user=None, limit=200)
-    if not scans: 
-        st.info("No scans recorded."); return
-    
-    # Apply filters
-    filtered_scans = scans[:]
-    
-    # Search filter
-    if search_scans:
-        search_lower = search_scans.lower()
-        filtered_scans = [s for s in filtered_scans if 
-                         search_lower in str(s.get('user', '')).lower() or 
-                         search_lower in str(s.get('scan_date', '')).lower()]
-    
-    # Sort
-    if sort_scans == "Oldest First":
-        filtered_scans.reverse()
-    
-    st.metric("Total Scans Performed", len(filtered_scans))
-    
-    if not filtered_scans:
-        st.info("No results match your search.")
-        return
-    
+    if not scans: st.info("No scans."); return
+    st.metric("Total Scans", len(scans))
     st.markdown("---")
-    # Show only: clinician, date, time — no patient info, no results
-    for s in filtered_scans:
-        scan_date = s.get("scan_date", "")[:16]
-        clinician = s.get("user", "Unknown")
-        st.markdown(f"🩺 **{scan_date}** — Clinician: `{clinician}`")
+    for s in scans:
+        st.markdown(f"🩺 **{s.get('scan_date','')[:16]}** — Clinician: `{s.get('user','?')}`")
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # MAIN
-# ═══════════════════════════════════════════════════════════════════════════
-
 def main():
     init_db(); navbar()
-    show_persistent_disclaimer()
     page = st.session_state["page"]; auth = st.session_state["authenticated"]; role = st.session_state.get("role","")
-
     if page == "home": page_home()
     elif page == "login":
-        if auth:
-            st.session_state["page"] = "scanner" if role == "clinician" else "manage_users"; st.rerun()
+        if auth: st.session_state["page"] = "scanner" if role == "clinician" else "manage_users"; st.rerun()
         else: page_login()
     elif page == "scanner":
         if not auth or role != "clinician": st.session_state["page"]="login"; st.rerun()
         else:
             models, res, thr, status = load_ensemble()
-            if status!="ok": st.error("Models not found.")
+            if status != "ok": st.error("Models not found.")
             else: page_scanner(models, res, thr)
     elif page == "history":
         if not auth or role != "clinician": st.session_state["page"]="login"; st.rerun()
