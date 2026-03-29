@@ -1,7 +1,6 @@
-#XAI methods for ECG explanation
 #Name: Kaveesha Punchihewa
 #ID: 20220094/w1959726
-#Every code used in this file is either implemented by me or adapted from research articles and other sources, they are cited and referenced. 
+#Every code used in this file is either implemented by me or adapted from research articles and other sources, they are cited and referenced in a document. 
 
 import numpy as np
 import torch
@@ -14,17 +13,10 @@ from typing import Dict, List, Optional, Tuple
 from config import LEAD_NAMES, CHAGAS_PATTERNS, NUM_LEADS, SAMPLING_RATE
 
 
-# UTILITY
-
-
 def _lead_imp_from_attr(attr: np.ndarray) -> Dict[str, float]:
-    """Convert a [12, T] attribution map to per-lead importance percentages.
-    Takes absolute values (importance = magnitude, not direction),
-    averages across time, then normalises to sum to 1.0."""
     per_lead = np.abs(attr).mean(axis=1)
     total = per_lead.sum() + 1e-8
     return {LEAD_NAMES[i]: float(per_lead[i] / total) for i in range(NUM_LEADS)}
-
 
 
 class IntegratedGradients:
@@ -44,8 +36,6 @@ class IntegratedGradients:
         grads = scaled.grad.mean(dim=0, keepdim=True)
         attr = (ecg - baseline) * grads
         return attr.squeeze(0).detach().cpu().numpy()
-
-
 
 
 class GradientSHAP:
@@ -69,8 +59,6 @@ class GradientSHAP:
                 if not np.isnan(a).any():
                     attrs.append(a)
         return np.mean(attrs, axis=0) if attrs else np.zeros((NUM_LEADS, ecg.shape[-1]))
-
-
 
 
 class OcclusionSensitivity:
@@ -101,7 +89,6 @@ class OcclusionSensitivity:
             imp.append(abs(orig - torch.sigmoid(self.model(occ, age, sex)).item()))
         arr = np.array(imp)
         return arr / (arr.max() + 1e-8)
-
 
 
 class GradCAM1D:
@@ -149,11 +136,8 @@ class GradCAM1D:
         self._hooks.clear()
 
 
-# DATA-DRIVEN ANALYSIS
-
 def _adaptive_threshold(values: np.ndarray) -> float:
-    """Otsu's method (1979): maximise between-class variance to separate
-    'important' from 'unimportant' values without hardcoded cutoffs."""
+   
     if len(values) < 2 or values.max() == values.min():
         return float(np.mean(values))
     bins = np.linspace(values.min(), values.max(), 50)
@@ -172,8 +156,7 @@ def _adaptive_threshold(values: np.ndarray) -> float:
 
 
 def _find_attention_peaks(heatmap: np.ndarray, fs: int = 400) -> List[Dict]:
-    """Auto-detect peaks in Grad-CAM temporal attention using scipy find_peaks.
-    Labels cardiac cycle regions based on timing."""
+    
     if heatmap is None or len(heatmap) < 5:
         return []
     thresh = _adaptive_threshold(heatmap)
@@ -208,9 +191,6 @@ def _find_attention_peaks(heatmap: np.ndarray, fs: int = 400) -> List[Dict]:
 
 
 def compute_method_consistency(imps: Dict[str, Dict[str, float]]) -> float:
-    """Kendall's tau-b between all XAI method pairs.
-    Passes raw importance values to kendalltau which computes ranks internally.
-    tau-b handles ties correctly."""
     if len(imps) < 2:
         return 1.0
     value_lists = []
@@ -229,8 +209,7 @@ def compute_method_consistency(imps: Dict[str, Dict[str, float]]) -> float:
 def detect_patterns(lead_imp: Dict[str, float],
                     grad_cam: Optional[np.ndarray] = None,
                     temporal_occ: Optional[np.ndarray] = None) -> List[Dict]:
-    """Data-driven pattern detection using Otsu adaptive threshold.
-    Patterns from Rojas et al. (2018): RBBB OR=4.60, LAFB OR=1.60."""
+    
     all_values = np.array(list(lead_imp.values()))
     importance_threshold = _adaptive_threshold(all_values)
     attention_peaks = _find_attention_peaks(grad_cam) if grad_cam is not None else []
@@ -266,8 +245,7 @@ def detect_patterns(lead_imp: Dict[str, float],
 
 def compute_confidence(prob: float, predictions: List[float],
                        method_cons: float, threshold: float) -> Tuple[str, float, str]:
-    """Multi-factor confidence from actual model outputs.
-    Margin (40%) + vote agreement (35%) + XAI consistency (25%)."""
+    
     margin = min(abs(prob - threshold) / 0.5, 1.0)
     n_models = len(predictions)
     if n_models > 1:
@@ -298,7 +276,6 @@ def compute_confidence(prob: float, predictions: List[float],
     elif score > 0.4: label = "Medium"
     else: label = "Low"
     return label, round(float(score), 3), "; ".join(reasons) if reasons else "Insufficient data"
-
 
 
 class ComprehensiveXAI:
