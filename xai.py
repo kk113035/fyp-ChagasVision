@@ -1,22 +1,7 @@
-"""
-ChagasVision Explainable AI (XAI)
-==================================
-All detection is DATA-DRIVEN — no hardcoded thresholds.
-
-4 Attribution Methods:
-  1. Integrated Gradients  — Sundararajan et al. (2017) ICML
-     Path integral from zero baseline satisfying Completeness axiom.
-  2. GradientSHAP          — Lundberg & Lee (2017) NeurIPS
-     Shapley value approximation using random noise baselines.
-  3. Occlusion Sensitivity — Zeiler & Fergus (2014) ECCV
-     Model-agnostic perturbation: zero each lead/window, measure change.
-  4. Grad-CAM (1-D)        — Selvaraju et al. (2017) ICCV
-     Gradient-weighted class activation map from convolutional layer.
-
-Cross-method agreement via Kendall's tau (Adebayo et al., 2018 NeurIPS).
-Ensemble disagreement analysis (Lakshminarayanan et al., 2017 NeurIPS).
-Clinical patterns aligned to Rojas et al. (2018) PLoS NTD.
-"""
+#XAI methods for ECG explanation
+#Name: Kaveesha Punchihewa
+#ID: 20220094/w1959726
+#Every code used in this file is either implemented by me or adapted from research articles and other sources, they are cited and referenced. 
 
 import numpy as np
 import torch
@@ -29,9 +14,8 @@ from typing import Dict, List, Optional, Tuple
 from config import LEAD_NAMES, CHAGAS_PATTERNS, NUM_LEADS, SAMPLING_RATE
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # UTILITY
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 def _lead_imp_from_attr(attr: np.ndarray) -> Dict[str, float]:
     """Convert a [12, T] attribution map to per-lead importance percentages.
@@ -42,14 +26,8 @@ def _lead_imp_from_attr(attr: np.ndarray) -> Dict[str, float]:
     return {LEAD_NAMES[i]: float(per_lead[i] / total) for i in range(NUM_LEADS)}
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# METHOD 1: INTEGRATED GRADIENTS (Sundararajan et al., 2017)
-# ═══════════════════════════════════════════════════════════════════════════
 
 class IntegratedGradients:
-    """Axiom-satisfying attribution: IG_i(x) = (x_i - x'_i) * integral dF/dx_i da
-    Zero baseline = absence of signal (standard for ECG)."""
-
     def __init__(self, model: nn.Module, n_steps: int = 50):
         self.model = model
         self.n_steps = n_steps
@@ -68,14 +46,9 @@ class IntegratedGradients:
         return attr.squeeze(0).detach().cpu().numpy()
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# METHOD 2: GRADIENT SHAP (Lundberg & Lee, 2017)
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 class GradientSHAP:
-    """Shapley value approximation via Expected Gradients.
-    Random noise baselines + random interpolation = Shapley values."""
-
     def __init__(self, model: nn.Module, n_samples: int = 25, noise_std: float = 0.1):
         self.model = model
         self.n_samples = n_samples
@@ -98,13 +71,9 @@ class GradientSHAP:
         return np.mean(attrs, axis=0) if attrs else np.zeros((NUM_LEADS, ecg.shape[-1]))
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# METHOD 3: OCCLUSION SENSITIVITY (Zeiler & Fergus, 2014)
-# ═══════════════════════════════════════════════════════════════════════════
+
 
 class OcclusionSensitivity:
-    """Model-agnostic perturbation: zero each lead/window, measure prediction change."""
-
     def __init__(self, model: nn.Module):
         self.model = model
 
@@ -134,14 +103,8 @@ class OcclusionSensitivity:
         return arr / (arr.max() + 1e-8)
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# METHOD 4: GRAD-CAM 1D (adapted from Selvaraju et al., 2017)
-# ═══════════════════════════════════════════════════════════════════════════
 
 class GradCAM1D:
-    """1D Grad-CAM: hooks conv layer for activations + gradients.
-    CAM = ReLU(sum of gradient-weighted activations) = WHERE the model focused."""
-
     def __init__(self, model: nn.Module, layer: str = "conv2"):
         self.model = model
         self.act = None
@@ -168,7 +131,6 @@ class GradCAM1D:
         return cam / (cam.max() + 1e-8)
 
     def compute_lead_importance(self, ecg, age, sex):
-        """Per-lead importance from input gradients during Grad-CAM pass."""
         self.model.eval()
         x = ecg.clone().requires_grad_(True)
         out = self.model(x, age, sex)
@@ -187,9 +149,7 @@ class GradCAM1D:
         self._hooks.clear()
 
 
-# ═══════════════════════════════════════════════════════════════════════════
 # DATA-DRIVEN ANALYSIS
-# ═══════════════════════════════════════════════════════════════════════════
 
 def _adaptive_threshold(values: np.ndarray) -> float:
     """Otsu's method (1979): maximise between-class variance to separate
@@ -249,11 +209,8 @@ def _find_attention_peaks(heatmap: np.ndarray, fs: int = 400) -> List[Dict]:
 
 def compute_method_consistency(imps: Dict[str, Dict[str, float]]) -> float:
     """Kendall's tau-b between all XAI method pairs.
-    
-    FIX: Previous version used argsort (sort indices) instead of actual values.
-    Now passes raw importance values to kendalltau which computes ranks internally.
-    tau-b handles ties correctly (scipy.stats.kendalltau).
-    """
+    Passes raw importance values to kendalltau which computes ranks internally.
+    tau-b handles ties correctly."""
     if len(imps) < 2:
         return 1.0
     value_lists = []
@@ -267,64 +224,6 @@ def compute_method_consistency(imps: Dict[str, Dict[str, float]]) -> float:
             if not np.isnan(tau):
                 taus.append(tau)
     return round(float(np.mean(taus)), 4) if taus else 0.0
-
-
-def compute_agreement_map(attrs: Dict[str, np.ndarray], sig_len: int = 2048) -> np.ndarray:
-    """Per-timepoint agreement across methods. Normalise each to [0,1], average."""
-    if not attrs:
-        return np.zeros((NUM_LEADS, sig_len))
-    normed = []
-    for attr in attrs.values():
-        a = np.abs(attr)
-        if a.shape[-1] != sig_len:
-            up = np.zeros((NUM_LEADS, sig_len))
-            for lead in range(min(a.shape[0], NUM_LEADS)):
-                up[lead] = np.interp(np.linspace(0, 1, sig_len),
-                                     np.linspace(0, 1, a.shape[-1]),
-                                     a[lead] if a.ndim == 2 else a)
-            a = up
-        for lead in range(min(a.shape[0], NUM_LEADS)):
-            mx = a[lead].max()
-            if mx > 0:
-                a[lead] /= mx
-        normed.append(a[:NUM_LEADS])
-    return np.mean(normed, axis=0)
-
-
-def analyse_ensemble(per_model_imps: List[Dict[str, float]],
-                     predictions: List[float],
-                     threshold: float = 0.5) -> Dict:
-    """Ensemble disagreement from actual votes and lead variance.
-    Reference: Lakshminarayanan et al. (2017) NeurIPS."""
-    n_models = len(predictions)
-    if n_models < 2:
-        return {"agreement_level": "single_model", "unanimity": 1.0,
-                "disagreement_leads": [], "high_confidence_leads": LEAD_NAMES[:3],
-                "positive_votes": "1/1", "lead_variance": {}}
-
-    pos_count = sum(1 for p in predictions if p >= threshold)
-    unanimity = max(pos_count, n_models - pos_count) / n_models
-    if unanimity == 1.0: level = "unanimous"
-    elif unanimity >= 0.8: level = "strong_majority"
-    elif unanimity >= 0.6: level = "majority"
-    else: level = "split"
-
-    lead_var = {}
-    for lead in LEAD_NAMES:
-        vals = [imp.get(lead, 0) for imp in per_model_imps]
-        lead_var[lead] = float(np.var(vals))
-
-    var_values = np.array(list(lead_var.values()))
-    var_thresh = _adaptive_threshold(var_values)
-    disagree = [l for l, v in sorted(lead_var.items(), key=lambda x: x[1], reverse=True)
-                if v > var_thresh][:4]
-    agree = [l for l, v in sorted(lead_var.items(), key=lambda x: x[1])][:4]
-
-    return {
-        "agreement_level": level, "unanimity": round(unanimity, 2),
-        "disagreement_leads": disagree, "high_confidence_leads": agree,
-        "lead_variance": lead_var, "positive_votes": f"{pos_count}/{n_models}",
-    }
 
 
 def detect_patterns(lead_imp: Dict[str, float],
@@ -391,9 +290,9 @@ def compute_confidence(prob: float, predictions: List[float],
     else:
         reasons.append(f"models disagree ({vote_agreement*100:.0f}% agree)")
     if xai_factor > 0.6:
-        reasons.append(f"XAI consistent (τ={method_cons:.2f})")
+        reasons.append(f"XAI consistent (tau={method_cons:.2f})")
     elif xai_factor < 0.3:
-        reasons.append(f"XAI disagree (τ={method_cons:.2f})")
+        reasons.append(f"XAI disagree (tau={method_cons:.2f})")
 
     if score > 0.7: label = "High"
     elif score > 0.4: label = "Medium"
@@ -401,80 +300,8 @@ def compute_confidence(prob: float, predictions: List[float],
     return label, round(float(score), 3), "; ".join(reasons) if reasons else "Insufficient data"
 
 
-def build_interpretation(prob, sorted_leads, patterns, predictions,
-                         method_cons, ensemble, threshold) -> Dict:
-    """Auto-generated interpretation — every statement references actual numbers."""
-    interp = {"summary": "", "clinical_findings": [], "technical_notes": [], "recommendations": []}
-    pct = round(prob * 100, 1)
-
-    if prob >= 0.75:
-        interp["summary"] = f"HIGH probability ({pct}%) of Chagas cardiomyopathy. Urgent serological testing recommended."
-    elif prob >= threshold:
-        interp["summary"] = f"ELEVATED probability ({pct}%) of Chagas cardiomyopathy. Serological confirmation recommended."
-    elif prob >= threshold - 0.1:
-        interp["summary"] = f"BORDERLINE risk ({pct}%) — cannot rule out Chagas. Follow-up evaluation advised."
-    elif prob >= 0.2:
-        interp["summary"] = f"LOW probability ({pct}%) but residual risk. Monitor if symptomatic."
-    else:
-        interp["summary"] = f"VERY LOW probability ({pct}%) of Chagas cardiomyopathy."
-
-    top3 = [f"{l} ({v*100:.1f}%)" for l, v in sorted_leads[:3]]
-    interp["clinical_findings"].append(f"Primary leads: {', '.join(top3)}")
-
-    chagas_set = {"V1", "V2", "V6", "I", "aVL", "II"}
-    n_chagas = sum(1 for l, _ in sorted_leads[:3] if l in chagas_set)
-    interp["clinical_findings"].append(
-        f"{n_chagas}/3 top leads are Chagas-relevant "
-        f"(V1/V2 → RBBB OR=4.60, I/aVL → LAFB OR=1.60, II → AV block; Rojas et al., 2018)")
-
-    for p in patterns[:3]:
-        finding = f"Detected: {p['name']} (strength {p['strength']*100:.1f}%)"
-        if p.get("temporal_region"): finding += f" — localised to {p['temporal_region']}"
-        finding += f" — {p['relevance']}"
-        interp["clinical_findings"].append(finding)
-
-    ea = ensemble
-    n_models = len(predictions)
-    pos_count = sum(1 for p in predictions if p >= threshold)
-    interp["technical_notes"].append(
-        f"Ensemble: {pos_count}/{n_models} models positive "
-        f"(probabilities: {', '.join(f'{p:.3f}' for p in predictions)})")
-    interp["technical_notes"].append(
-        f"Std: {np.std(predictions):.4f} — "
-        f"{'low variance' if np.std(predictions) < 0.05 else 'moderate variance'}")
-    if ea.get("high_confidence_leads"):
-        interp["technical_notes"].append(f"Models agree on: {', '.join(ea['high_confidence_leads'][:3])}")
-    if ea.get("disagreement_leads"):
-        interp["technical_notes"].append(f"Models disagree on: {', '.join(ea['disagreement_leads'][:3])}")
-    interp["technical_notes"].append(
-        f"XAI agreement: τ = {method_cons:.2f} "
-        f"({'strong' if method_cons > 0.6 else 'moderate' if method_cons > 0.3 else 'weak'})")
-
-    if prob >= 0.5:
-        interp["recommendations"] = [
-            "Serological confirmation (ELISA/IFA) strongly recommended",
-            "Echocardiogram to assess cardiac function",
-            "Cardiology specialist referral",
-            "Holter monitor for arrhythmia assessment"]
-    elif prob >= threshold - 0.1:
-        interp["recommendations"] = [
-            "Follow-up ECG in 3-6 months",
-            "Consider serology if clinically suspicious",
-            "Screen family members if from endemic area"]
-    elif prob >= 0.2:
-        interp["recommendations"] = ["Routine clinical follow-up", "Repeat ECG if symptoms develop"]
-    else:
-        interp["recommendations"] = ["Routine follow-up — no immediate action required"]
-    return interp
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# COMPREHENSIVE XAI ORCHESTRATOR
-# ═══════════════════════════════════════════════════════════════════════════
 
 class ComprehensiveXAI:
-    """Runs all 4+1 methods across ensemble, aggregates, analyses."""
-
     def __init__(self, models: List[nn.Module]):
         self.models = models
 
@@ -487,7 +314,7 @@ class ComprehensiveXAI:
         age_t = torch.tensor([age]).float()
         sex_t = torch.tensor([sex]).long()
 
-        # Step 1: Ensemble prediction
+        # Step 1: Ensemble prediction — each model votes independently
         preds = []
         with torch.no_grad():
             for m in self.models:
@@ -498,38 +325,34 @@ class ComprehensiveXAI:
         # Step 2: Run XAI methods
         method_imps = {}
         method_attrs = {}
-        per_model_imps = []
 
-        # Vanilla Gradient (all models)
+        # Vanilla Gradient (all models — fast baseline)
         for idx, m in enumerate(self.models):
             try:
                 g = ecg.clone().requires_grad_(True)
                 torch.sigmoid(m(g, age_t, sex_t)).sum().backward()
                 m.zero_grad()
                 attr = g.grad.squeeze(0).abs().detach().cpu().numpy()
-                key = f"gradient_m{idx+1}"
-                method_imps[key] = _lead_imp_from_attr(attr)
-                per_model_imps.append(method_imps[key])
+                method_imps[f"gradient_m{idx+1}"] = _lead_imp_from_attr(attr)
                 if idx == 0: method_attrs["gradient"] = attr
             except Exception: pass
 
-        # Integrated Gradients (first 2 models)
+        # Integrated Gradients (first 2 models — axiomatic)
         for idx in range(min(2, len(self.models))):
             try:
                 attr = IntegratedGradients(self.models[idx], n_steps=30).compute(ecg.clone(), age_t, sex_t)
-                key = f"intgrad_m{idx+1}"
-                method_imps[key] = _lead_imp_from_attr(attr)
-                method_attrs[key] = attr
+                method_imps[f"intgrad_m{idx+1}"] = _lead_imp_from_attr(attr)
+                method_attrs[f"intgrad_m{idx+1}"] = attr
             except Exception: pass
 
-        # GradientSHAP (first model)
+        # GradientSHAP (first model — Shapley values)
         try:
             attr = GradientSHAP(self.models[0], n_samples=20).compute(ecg.clone(), age_t, sex_t)
             method_imps["shap"] = _lead_imp_from_attr(attr)
             method_attrs["shap"] = attr
         except Exception: pass
 
-        # Occlusion (first 2 models)
+        # Occlusion Sensitivity (first 2 models — perturbation-based)
         temporal_occ = None
         for idx in range(min(2, len(self.models))):
             try:
@@ -538,7 +361,7 @@ class ComprehensiveXAI:
                 if idx == 0: temporal_occ = occ.compute_temporal(ecg, age_t, sex_t)
             except Exception: pass
 
-        # Grad-CAM (first 2 models) — FIX: now stored in method_imps
+        # Grad-CAM (first 2 models — temporal attention heatmap)
         grad_cam = None
         for idx in range(min(2, len(self.models))):
             try:
@@ -551,7 +374,7 @@ class ComprehensiveXAI:
                     grad_cam = cam if grad_cam is None else (grad_cam + cam) / 2
             except Exception: pass
 
-        # Step 3: Aggregate
+        # Step 3: Aggregate all methods into one lead importance ranking
         agg = {}
         for lead in LEAD_NAMES:
             vals = [d.get(lead, 0) for d in method_imps.values()]
@@ -560,10 +383,10 @@ class ComprehensiveXAI:
         lead_importance = {k: v / total for k, v in agg.items()}
         sorted_leads = sorted(lead_importance.items(), key=lambda x: x[1], reverse=True)
 
-        # Step 4: Analysis
+        # Step 4: Cross-method agreement
         method_cons = compute_method_consistency(method_imps)
-        agreement_map = compute_agreement_map(method_attrs)
 
+        # Model consistency = vote agreement
         n_models = len(preds)
         if n_models > 1:
             pos_count = sum(1 for p in preds if p >= threshold)
@@ -571,15 +394,15 @@ class ComprehensiveXAI:
         else:
             model_cons = 1.0
 
-        ens_analysis = analyse_ensemble(per_model_imps, preds, threshold)
+        # Step 5: Pattern detection & attention peaks
         attention_peaks = _find_attention_peaks(grad_cam) if grad_cam is not None else []
         patterns = detect_patterns(lead_importance, grad_cam, temporal_occ)
 
+        # Step 6: Confidence
         conf_label, conf_score, conf_explanation = compute_confidence(
             avg_prob, preds, method_cons, threshold)
-        interpretation = build_interpretation(
-            avg_prob, sorted_leads, patterns, preds, method_cons, ens_analysis, threshold)
 
+        # Count method types actually used
         method_types = set()
         for k in method_imps.keys():
             if k.startswith("gradient_m"): method_types.add("Gradient")
@@ -598,18 +421,12 @@ class ComprehensiveXAI:
             "confidence_explanation": conf_explanation,
             "lead_importance": lead_importance,
             "sorted_leads": sorted_leads,
-            "per_method_importances": method_imps,
-            "methods_used": list(method_imps.keys()),
             "method_types": sorted(method_types),
             "n_methods": len(method_types),
             "grad_cam": grad_cam,
             "temporal_occlusion": temporal_occ,
             "attention_peaks": attention_peaks,
-            "agreement_map": agreement_map,
-            "attribution_maps": method_attrs,
             "model_consistency": round(model_cons, 4),
             "method_consistency": method_cons,
-            "ensemble_analysis": ens_analysis,
             "detected_patterns": patterns,
-            "interpretation": interpretation,
         }
