@@ -182,8 +182,8 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         for u, p, n, did, r in [
-            ("admin", "admin123", "System Administrator", "EMP-001", "admin"),
-            ("clinician", "chagas2025", "Dr. Clinical User", "DOC-001", "clinician"),
+            ("adminTest1", "admin123@", "System Administrator", "EMP-001", "admin"),
+            ("clinicianTest1", "clinic123@", "Dr. Ajith Peris", "DOC-001", "clinician"),
         ]:
             c.execute("INSERT INTO users (username,password_hash,full_name,doctor_id,role,created_at) VALUES (?,?,?,?,?,?)",
                       (u, hashlib.sha256(p.encode()).hexdigest(), n, did, r, now_sl().strftime("%Y-%m-%d %H:%M:%S")))
