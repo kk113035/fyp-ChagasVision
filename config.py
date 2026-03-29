@@ -1,15 +1,11 @@
-"""
-ChagasVision Configuration
-===========================
-Single source of truth for all paths, hyperparameters, and constants.
-Every other module imports from this file.
-"""
+#Name: Kaveesha Punchihewa
+#ID: 20220094/w1959726
+#Every code used in this file is either implemented by me or adapted from research articles and other sources, they are cited and referenced in a document. 
 
 from pathlib import Path
 from dataclasses import dataclass
 from typing import Tuple
 
-# ── Project Paths ────────────────────────────────────────────────────────────
 
 # PROJECT_ROOT = Path(r"D:\Kaveesha - IIT\4th Year\FYP\ChagasVisionProto")
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -29,7 +25,7 @@ PROCESSED_DIR = PROJECT_ROOT / "dataProcessed"
 MODELS_DIR    = PROJECT_ROOT / "models_improved"
 RESULTS_DIR   = PROJECT_ROOT / "results"
 
-# ── ECG Constants ────────────────────────────────────────────────────────────
+#ECG 
 
 SAMPLING_RATE   = 400           # Hz (standard for SaMi-Trop / CODE-15)
 SEQUENCE_LENGTH = 2048          # samples → 5.12 s at 400 Hz
@@ -37,130 +33,49 @@ NUM_LEADS       = 12
 LEAD_NAMES      = ['I','II','III','aVR','aVL','aVF','V1','V2','V3','V4','V5','V6']
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# DATACLASSES
-# ══════════════════════════════════════════════════════════════════════════════
+
 
 @dataclass
 class ModelConfig:
-    """
-    Architecture hyperparameters — each backed by published research.
-
-    MULTI-SCALE KERNELS (3, 7, 15):
-      k=3  → 7.5 ms at 400 Hz → captures sharp QRS edges, rapid transitions
-      k=7  → 17.5 ms → captures P-wave and T-wave morphology
-      k=15 → 37.5 ms → captures ST segment, broad waveform patterns
-      Szegedy et al. (2015) showed multi-scale (Inception) improves feature
-      diversity. Yao et al. (2020) demonstrated this for ECG specifically.
-
-    SE ATTENTION (reduction=16):
-      Learns channel (lead) importance dynamically. For Chagas detection,
-      V1/V2 should be upweighted for RBBB detection (OR=4.60, Rojas 2018).
-      Hu et al. (2018) showed SE blocks add <1% parameters but improve
-      ImageNet accuracy by 0.5%.
-
-    TRANSFORMER (2 layers, 4 heads):
-      Captures long-range dependencies: P→QRS interval (AV block),
-      inter-lead concordance (bifascicular block), rhythm regularity.
-      2 layers prevents overfitting with limited data (~83K samples).
-      Hannun et al. (2019) showed Transformers outperform pure CNNs for ECG.
-      Pre-norm (norm_first=True) is more stable (Xiong et al., 2020).
-
-    METADATA (8 dims):
-      Age and sex influence Chagas prevalence and ECG morphology.
-      Original 32-dim overfit to demographics → reduced to 8-dim.
-      This forces the model to primarily learn from ECG waveforms.
-      Ribeiro et al. (2020) showed metadata improves AUC by ~2%.
-
-    DROPOUT (0.4):
-      Standard range for medical AI with limited data (0.3-0.5).
-      Srivastava et al. (2014) 'Dropout' JMLR; Goodfellow et al. (2016)
-      recommend 0.5 for hidden layers; we use 0.4 as a balance.
-    """
+    
     num_leads: int              = NUM_LEADS
     seq_length: int             = SEQUENCE_LENGTH
-    ms_out_channels: int        = 32            # per branch → 96 total after concat
-    kernel_sizes: Tuple[int,...] = (3, 7, 15)   # multi-scale (Szegedy 2015)
-    conv2_out: int              = 128           # second conv block output
-    conv2_kernel: int           = 7             # 17.5 ms window at 400 Hz
-    use_se: bool                = True          # SE attention (Hu 2018)
-    se_reduction: int           = 16            # standard reduction ratio
-    d_model: int                = 128           # transformer dimension
-    nhead: int                  = 4             # 32 dims per head (128/4)
-    num_transformer_layers: int = 2             # sufficient for ECG complexity
-    dim_feedforward: int        = 512           # 4× d_model (Vaswani 2017)
-    use_metadata: bool          = True          # age + sex (minimal influence)
-    metadata_dim: int           = 8             # small to prevent shortcuts
-    dropout: float              = 0.4           # (Srivastava 2014, Goodfellow 2016)
+    ms_out_channels: int        = 32            
+    kernel_sizes: Tuple[int,...] = (3, 7, 15)   
+    conv2_out: int              = 128           
+    conv2_kernel: int           = 7             
+    use_se: bool                = True          
+    se_reduction: int           = 16           
+    d_model: int                = 128           
+    nhead: int                  = 4             
+    num_transformer_layers: int = 2             
+    dim_feedforward: int        = 512           
+    use_metadata: bool          = True          
+    metadata_dim: int           = 8             
+    dropout: float              = 0.4           
 
 
 @dataclass
 class TrainingConfig:
-    """
-    Training hyperparameters — each backed by published research.
-
-    LEARNING RATE (5e-4):
-      This value was empirically validated in your previous training run
-      (achieved balanced accuracy 0.7648).  Loshchilov & Hutter (2019)
-      recommend 1e-4 to 3e-4 for AdamW, but 5e-4 converges faster on
-      CPU and your ReduceLROnPlateau scheduler will reduce it as needed.
-      With 5e-4, training converges in ~20-25 epochs per fold.
-      With 1e-4, it would need ~40-50 epochs (doubling CPU time).
-
-    WEIGHT DECAY (1e-4):
-      L2 regularisation decoupled from adaptive LR (AdamW).
-      Prevents weights from growing unboundedly → better generalisation.
-      Loshchilov & Hutter (2019) recommend 1e-4 to 1e-2.
-
-    BATCH SIZE (16):
-      Small batch needed because WeightedRandomSampler creates batches
-      with ~5-6 positives (from oversample_factor=20). Larger batches
-      would dilute the positive signal. Also constrained by CPU memory.
-
-    OVERSAMPLE FACTOR (20):
-      With 3.4% prevalence: 16 × 3.4% ≈ 0.5 positives per batch.
-      Factor 20 → 16 × (20×3.4%) / (20×3.4% + 96.6%) ≈ 5 positives/batch.
-      He et al. (2009) IEEE TKDE: oversampling is most effective when
-      combined with cost-sensitive learning (our focal loss).
-
-    FOCAL GAMMA (2.0):
-      Lin et al. (2017) tested γ ∈ {0, 0.5, 1, 2, 5}.
-      γ=2.0 gave best results for all imbalance ratios in their study.
-      At γ=2: easy examples (p_t=0.9) are 100× downweighted.
-
-    PATIENCE (7):
-      Early stopping prevents overfitting. With ReduceLROnPlateau
-      (patience=4), the LR drops once before early stopping triggers.
-      Patience=7 gives the model one chance to recover after LR drop
-      without wasting epochs.  Your previous run used 6; 7 is slightly
-      more generous to avoid premature stopping.
-
-    GRADIENT CLIPPING (1.0):
-      Pascanu et al. (2013) ICML: gradient clipping prevents explosion
-      from rare high-loss samples. max_norm=1.0 is standard.
-    """
+    
     experiment_name: str   = "ensemble_v2_improved"
     n_folds: int           = 5
-    max_epochs: int        = 50              # early stopping will trigger ~25
-    batch_size: int        = 16              # small for effective oversampling
-    learning_rate: float   = 5e-4            # proven: converges in ~25 epochs
-    weight_decay: float    = 1e-4            # decoupled L2 (Loshchilov 2019)
-    patience: int          = 7               # stop after 7 no-improvement epochs
-    gradient_clip: float   = 1.0             # Pascanu et al. (2013)
-    oversample_factor: int = 20              # ~5 positives per batch
-    focal_gamma: float     = 2.0             # Lin et al. (2017) optimal
-    label_smoothing: float = 0.1             # Müller et al. (2019)
+    max_epochs: int        = 50              
+    batch_size: int        = 16              
+    learning_rate: float   = 5e-4            
+    weight_decay: float    = 1e-4            
+    patience: int          = 7               
+    gradient_clip: float   = 1.0             
+    oversample_factor: int = 20              
+    focal_gamma: float     = 2.0             
+    label_smoothing: float = 0.1             
     seed: int              = 42
     use_augmentation: bool = True
 
 
 @dataclass
 class AugmentConfig:
-    """
-    ECG-specific augmentation probabilities.
-
-    References: Hannun et al. (2019), Park et al. (2019), Natarajan et al. (2020).
-    """
+    
     noise_prob: float       = 0.5
     noise_std_range: Tuple[float, float] = (0.01, 0.05)
     scale_prob: float       = 0.5
@@ -174,7 +89,6 @@ class AugmentConfig:
     time_mask_width: int    = 100
 
 
-# ── Clinical ECG Patterns for XAI alignment ──────────────────────────────────
 
 CHAGAS_PATTERNS = {
     "rbbb": {
@@ -214,11 +128,9 @@ CHAGAS_PATTERNS = {
     },
 }
 
-# ── Literature Baselines for statistical comparison ──────────────────────────
-# NOTE: Different papers use different metrics. Compare like-for-like only.
+
 
 LITERATURE_BASELINES = {
-    # ── Compare using balanced accuracy (sens+spec)/2 ──
     "CinC_2025_baseline": {
         "score": 0.691,
         "metric": "balanced_accuracy",
@@ -250,7 +162,6 @@ LITERATURE_BASELINES = {
     },
 }
 
-# ── Utility ──────────────────────────────────────────────────────────────────
 
 def verify_paths() -> bool:
     """Check all required data files exist."""
