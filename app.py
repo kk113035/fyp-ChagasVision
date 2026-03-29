@@ -600,13 +600,6 @@ def page_scanner(models, results, default_threshold):
                 st.markdown('<p class="shdr">Grad-CAM ECG Overlay</p>', unsafe_allow_html=True)
                 st.pyplot(plot_ecg_gradcam(processed, result["lead_importance"], result.get("grad_cam"))); plt.close()
 
-                
-                # 5. Temporal Occlusion — which TIME regions matter
-                if result.get("temporal_occlusion") is not None:
-                    st.markdown('<p class="shdr">Temporal Occlusion</p>', unsafe_allow_html=True)
-                    fig = plot_temporal_occlusion(result["temporal_occlusion"])
-                    if fig: st.pyplot(fig); plt.close()
-
 
                 # Disclaimer + save + download
                 st.markdown("DISCLAIMER: ChagasVision is a clinical decision support tool for research purposes only.", unsafe_allow_html=True)
