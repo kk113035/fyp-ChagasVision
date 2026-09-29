@@ -497,8 +497,8 @@ def page_login():
     with col:
         st.markdown("##### Sign in to your account")
         st.caption("Authorised personnel only - admin login credentials")
-        st.caption("Admin login credentials ( username - a , password - a"))
-        st.caption("Clinician login credentials ( username - c , password - c"))
+        st.caption("Admin login credentials - username - a , password - a")
+        st.caption("Clinician login credentials - username - c , password - c")
 
 
         with st.form("login"):
