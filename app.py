@@ -154,8 +154,8 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         for u, p, n, did, r in [
-            ("a", "a", "System Administrator", "EMP-001", "admin"),
-            ("c", "c", "Dr. Ajith Peris", "DOC-001", "clinician"),
+            ("adminTest1", "admin123@", "System Administrator", "EMP-001", "admin"),
+            ("clinicianTest1", "clinic123@", "Dr. Ajith Peris", "DOC-001", "clinician"),
         ]:
             c.execute("INSERT INTO users (username,password_hash,full_name,doctor_id,role,created_at) VALUES (?,?,?,?,?,?)",
                       (u, hashlib.sha256(p.encode()).hexdigest(), n, did, r, now_sl().strftime("%Y-%m-%d %H:%M:%S")))
@@ -497,8 +497,8 @@ def page_login():
     with col:
         st.markdown("##### Sign in to your account")
         st.caption("Authorised personnel only - admin login credentials")
-        st.caption("Admin login credentials - username - a , password - a")
-        st.caption("Clinician login credentials - username - c , password - c")
+        st.caption("Admin login credentials - username - adminTest1 , password - admin123@")
+        st.caption("Clinician login credentials - username - clinicianTest1 , password - clinic123@")
 
 
         with st.form("login"):
